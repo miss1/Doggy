@@ -44,7 +44,7 @@ int main() {
 		glfwSwapBuffers(w);                          
 	}
 
-  glfwDestroyWindow(w);
+	glfwDestroyWindow(w);
 	glfwTerminate();
 	delete game;
 	return 0;
