@@ -2,7 +2,9 @@
 
 #include <glad.h>
 #include <GLFW/glfw3.h>
+#include <time.h>
 #include "GLXtras.h"
+#include "IO.h"
 #include "Sprite.h"
 
 Sprite background, actor;
@@ -16,6 +18,22 @@ constexpr auto startY = 40.0;
 
 bool isLeftKeyPressed = false;
 bool isRightKeyPressed = false;
+
+bool	scrolling = true, vertically = true;
+
+float	loopDuration = 2, accumulatedVTime = 0, accumulatedHTime = 0;
+time_t	scrollTime = clock();
+
+void Scroll() {
+	time_t now = clock();
+	if (scrolling) {
+		float dt = (float)(now - scrollTime) / CLOCKS_PER_SEC;
+		(vertically ? accumulatedVTime : accumulatedHTime) += dt;
+	}
+	scrollTime = now;
+	float v = accumulatedVTime / loopDuration, u = accumulatedHTime / loopDuration;
+	background.uvTransform = Translate(u, v, 0);
+}
 
 void Keyboard(int key, int action, bool shift, bool control) {
 	if (key == GLFW_KEY_LEFT) {
@@ -42,7 +60,34 @@ void Keyboard(int key, int action, bool shift, bool control) {
 vec2 getNormalizedPosition(float x, float y) {
 	float x_ndc = 2.0f * x / windowWidth - 1.0f;
 	float y_ndc = 2.0f * y / windowHeight - 1.0f;
-	return vec2 (x_ndc, y_ndc);
+	return vec2(x_ndc, y_ndc);
+}
+
+void Display() {
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	// glClear(GL_DEPTH_BUFFER_BIT);
+	// glEnable(GL_DEPTH_TEST);
+	
+	if (isLeftKeyPressed) {
+		vec2 p = actor.GetPosition();
+		if (p.x > getNormalizedPosition(leftBoundary, startY).x) {
+			p.x -= 0.005;
+			actor.SetPosition(p);
+		}
+	}
+
+	if (isRightKeyPressed) {
+		vec2 p = actor.GetPosition();
+		if (p.x < getNormalizedPosition(rightBoundary, startY).x) {
+			p.x += 0.005;
+			actor.SetPosition(p);
+		}
+	}
+
+	background.Display();
+	actor.Display();
+	glFlush();
 }
 
 // Application
@@ -52,7 +97,6 @@ void Resize(int width, int height) { glViewport(0, 0, width, height); }
 int main(int ac, char** av) {
 	GLFWwindow* w = InitGLFW(200, 200, windowWidth, windowHeight, "Doggy");
 	// read background, foreground, and mat textures
-	// sprite1.Initialize(pix1, .5f); sprite1.SetScale(.3f);
 	background.Initialize("Image/game-bg.png");
 	actor.Initialize("Image/car-yellow.png");
 	actor.SetScale(.1f);
@@ -61,29 +105,10 @@ int main(int ac, char** av) {
 	RegisterResize(Resize);
 	RegisterKeyboard(Keyboard);
 	// event loop
+	glfwSwapInterval(1);
 	while (!glfwWindowShouldClose(w)) {
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-		if (isLeftKeyPressed) {
-			vec2 p = actor.GetPosition();
-			if (p.x > getNormalizedPosition(leftBoundary, startY).x) {
-				p.x -= 0.005;
-				actor.SetPosition(p);
-			}
-		}
-
-		if (isRightKeyPressed) {
-			vec2 p = actor.GetPosition();
-			if (p.x < getNormalizedPosition(rightBoundary, startY).x) {
-				p.x += 0.005;
-				actor.SetPosition(p);
-			}
-		}
-
-		background.Display();
-		actor.Display();
-		glFlush();
+		Scroll();
+		Display();
 		glfwSwapBuffers(w);
 		glfwPollEvents();
 	}
