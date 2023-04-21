@@ -50,7 +50,7 @@ void MouseWheel(GLFWwindow *w, double ignore, double spin) { mwcb((float) spin);
 void Resize(GLFWwindow *w, int width, int height) { rcb(width, height); }
 
 void Keyboard(GLFWwindow *w, int key, int scancode, int action, int mods) {
-	kcb(key, action == GLFW_PRESS, mods & GLFW_MOD_SHIFT, mods & GLFW_MOD_CONTROL);
+	kcb(key, action, mods & GLFW_MOD_SHIFT, mods & GLFW_MOD_CONTROL);
 }
 
 } // end namespace

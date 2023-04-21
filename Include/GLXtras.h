@@ -17,7 +17,7 @@ typedef void(*MouseMoveCallback)(float x, float y, bool leftDown, bool rightDown
 	// x,y with respect to lower-left of window
 typedef void(*MouseWheelCallback)(float spin);
 typedef void(*ResizeCallback)(int width, int height);
-typedef void(*KeyboardCallback)(int key, bool press, bool shift, bool control);
+typedef void(*KeyboardCallback)(int key, int action, bool shift, bool control);
 void RegisterMouseButton(MouseButtonCallback);
 void RegisterMouseMove(MouseMoveCallback);
 void RegisterMouseWheel(MouseWheelCallback);

@@ -1,51 +1,90 @@
-// Demo-ClearScreen.cpp
+// Sprite.cpp - 2D display and manipulate texture-mapped quad
 
-#include <glad.h>                                         
-#include <glfw3.h>                                        
-#include "GLXtras.h" 
-#include "Game.h"
-#include "Config.h"
+#include <glad.h>
+#include <GLFW/glfw3.h>
+#include "GLXtras.h"
+#include "Sprite.h"
 
-Game* game;
+Sprite background, actor;
 
-void Keyboard(int key, bool press, bool shift, bool control) {
-	
-}
+constexpr auto windowWidth = 600;
+constexpr auto windowHeight = 700;
+constexpr auto leftBoundary = 140.0;
+constexpr auto rightBoundary = 460.0;
+constexpr auto startX = 165.0;
+constexpr auto startY = 40.0;
 
-void MouseButton(float x, float y, bool left, bool down) {
-	if (down && game->menu.isClickStart(x, y)) {
-		cout << "start" << endl;
-	}
+bool isLeftKeyPressed = false;
+bool isRightKeyPressed = false;
 
-	if (down && game->menu.isClickExit(x, y)) {
-		cout << "exit" << endl;
-	}
-}
-
-int main() {
-	GLFWwindow *w = InitGLFW(600, 200, windowWidth, windowHeight, "Doggy");
-	RegisterKeyboard(Keyboard);
-	RegisterMouseButton(MouseButton);
-
-	game = new Game();
-	while (!glfwWindowShouldClose(w)) {
-		glfwPollEvents();
-		// set background color
-		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
-		                    
-		game->draw();
-
-		while (game->isPlay) {
-			game->play();
-			glfwSwapBuffers(w);
+void Keyboard(int key, int action, bool shift, bool control) {
+	if (key == GLFW_KEY_LEFT) {
+		if (action == GLFW_PRESS) {
+			isLeftKeyPressed = true;
 		}
-		                                       
-		glfwSwapBuffers(w);                          
+
+		if (action == GLFW_RELEASE) {
+			isLeftKeyPressed = false;
+		}
 	}
 
-	glfwDestroyWindow(w);
-	glfwTerminate();
-	delete game;
-	return 0;
+	if (key == GLFW_KEY_RIGHT) {
+		if (action == GLFW_PRESS) {
+			isRightKeyPressed = true;
+		}
+
+		if (action == GLFW_RELEASE) {
+			isRightKeyPressed = false;
+		}
+	}
+}
+
+vec2 getNormalizedPosition(float x, float y) {
+	float x_ndc = 2.0f * x / windowWidth - 1.0f;
+	float y_ndc = 2.0f * y / windowHeight - 1.0f;
+	return vec2 (x_ndc, y_ndc);
+}
+
+// Application
+
+void Resize(int width, int height) { glViewport(0, 0, width, height); }
+
+int main(int ac, char** av) {
+	GLFWwindow* w = InitGLFW(200, 200, windowWidth, windowHeight, "Doggy");
+	// read background, foreground, and mat textures
+	// sprite1.Initialize(pix1, .5f); sprite1.SetScale(.3f);
+	background.Initialize("Image/game-bg.png");
+	actor.Initialize("Image/car-yellow.png");
+	actor.SetScale(.1f);
+	actor.SetPosition(getNormalizedPosition(startX, startY));
+	// callbacks
+	RegisterResize(Resize);
+	RegisterKeyboard(Keyboard);
+	// event loop
+	while (!glfwWindowShouldClose(w)) {
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+		if (isLeftKeyPressed) {
+			vec2 p = actor.GetPosition();
+			if (p.x > getNormalizedPosition(leftBoundary, startY).x) {
+				p.x -= 0.005;
+				actor.SetPosition(p);
+			}
+		}
+
+		if (isRightKeyPressed) {
+			vec2 p = actor.GetPosition();
+			if (p.x < getNormalizedPosition(rightBoundary, startY).x) {
+				p.x += 0.005;
+				actor.SetPosition(p);
+			}
+		}
+
+		background.Display();
+		actor.Display();
+		glFlush();
+		glfwSwapBuffers(w);
+		glfwPollEvents();
+	}
 }
