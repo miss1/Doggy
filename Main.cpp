@@ -7,7 +7,7 @@
 #include "IO.h"
 #include "Sprite.h"
 
-Sprite background, actor;
+Sprite background, player;
 
 string backgroundImg_path = "Image/game-bg.png", playerImg_path = "Image/car-yellow.png";
 
@@ -72,23 +72,23 @@ void Display() {
 	// glEnable(GL_DEPTH_TEST);
 	
 	if (isLeftKeyPressed) {
-		vec2 p = actor.GetPosition();
+		vec2 p = player.GetPosition();
 		if (p.x > getNormalizedPosition(leftBoundary, startY).x) {
 			p.x -= 0.005;
-			actor.SetPosition(p);
+			player.SetPosition(p);
 		}
 	}
 
 	if (isRightKeyPressed) {
-		vec2 p = actor.GetPosition();
+		vec2 p = player.GetPosition();
 		if (p.x < getNormalizedPosition(rightBoundary, startY).x) {
 			p.x += 0.005;
-			actor.SetPosition(p);
+			player.SetPosition(p);
 		}
 	}
 
 	background.Display();
-	actor.Display();
+	player.Display();
 	glFlush();
 }
 
@@ -100,9 +100,9 @@ int main(int ac, char** av) {
 	GLFWwindow* w = InitGLFW(200, 200, windowWidth, windowHeight, "Doggy");
 	// read background, foreground, and mat textures
 	background.Initialize(backgroundImg_path);
-	actor.Initialize(playerImg_path);
-	actor.SetScale(.1f);
-	actor.SetPosition(getNormalizedPosition(startX, startY));
+	player.Initialize(playerImg_path);
+	player.SetScale(.1f);
+	player.SetPosition(getNormalizedPosition(startX, startY));
 	// callbacks
 	RegisterResize(Resize);
 	RegisterKeyboard(Keyboard);
