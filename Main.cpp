@@ -7,9 +7,11 @@
 #include "IO.h"
 #include "Sprite.h"
 
-Sprite background, player;
+Sprite background, player, obstacle;
 
-string backgroundImg_path = "Image/game-bg.png", playerImg_path = "Image/car-yellow.png";
+string backgroundImg_path = "Image/game-bg.png";
+string playerImg_path = "Image/car-yellow.png";
+string obstacleImg_path = "Image/car-purple.png";
 
 constexpr float windowWidth = 600;
 constexpr float windowHeight = 700;
@@ -25,8 +27,12 @@ bool	scrolling = true, vertically = true;
 
 float	loopDuration = 2, accumulatedVTime = 0, accumulatedHTime = 0;
 time_t	scrollTime = clock();
+float	elapsedTime = 0;
+float	vScrollMod = 0;
+float	obstacleDelay = 2; // wait till display obstacle (in secs.)
 
 void Scroll() {
+
 	time_t now = clock();
 	if (scrolling) {
 		float dt = (float)(now - scrollTime) / CLOCKS_PER_SEC;
@@ -89,6 +95,7 @@ void Display() {
 
 	background.Display();
 	player.Display();
+	obstacle.Display();
 	glFlush();
 }
 
@@ -103,6 +110,9 @@ int main(int ac, char** av) {
 	player.Initialize(playerImg_path);
 	player.SetScale(.1f);
 	player.SetPosition(getNormalizedPosition(startX, startY));
+	obstacle.Initialize(obstacleImg_path);
+	obstacle.SetScale(.1f);
+	obstacle.SetPosition(getNormalizedPosition(startX, windowHeight));
 	// callbacks
 	RegisterResize(Resize);
 	RegisterKeyboard(Keyboard);
