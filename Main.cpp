@@ -114,4 +114,6 @@ int main(int ac, char** av) {
 		glfwSwapBuffers(w);
 		glfwPollEvents();
 	}
+	glfwDestroyWindow(w);
+	glfwTerminate();
 }
