@@ -9,12 +9,12 @@
 
 Sprite background, actor;
 
-constexpr auto windowWidth = 600;
-constexpr auto windowHeight = 700;
-constexpr auto leftBoundary = 140.0;
-constexpr auto rightBoundary = 460.0;
-constexpr auto startX = 165.0;
-constexpr auto startY = 40.0;
+constexpr float windowWidth = 600;
+constexpr float windowHeight = 700;
+constexpr float leftBoundary = 140.0;
+constexpr float rightBoundary = 460.0;
+constexpr float startX = 165.0;
+constexpr float startY = 40.0;
 
 bool isLeftKeyPressed = false;
 bool isRightKeyPressed = false;
