@@ -9,6 +9,8 @@
 
 Sprite background, actor;
 
+string backgroundImg_path = "Image/game-bg.png", playerImg_path = "Image/car-yellow.png";
+
 constexpr float windowWidth = 600;
 constexpr float windowHeight = 700;
 constexpr float leftBoundary = 140.0;
@@ -97,8 +99,8 @@ void Resize(int width, int height) { glViewport(0, 0, width, height); }
 int main(int ac, char** av) {
 	GLFWwindow* w = InitGLFW(200, 200, windowWidth, windowHeight, "Doggy");
 	// read background, foreground, and mat textures
-	background.Initialize("Image/game-bg.png");
-	actor.Initialize("Image/car-yellow.png");
+	background.Initialize(backgroundImg_path);
+	actor.Initialize(playerImg_path);
 	actor.SetScale(.1f);
 	actor.SetPosition(getNormalizedPosition(startX, startY));
 	// callbacks
