@@ -8,11 +8,12 @@
 #include "IO.h"
 #include "Sprite.h"
 
-Sprite background, player, obstacle;
+Sprite background, player, obstacle, explosion;
 
 string backgroundImg_path = "Image/game-bg.png";
 string playerImg_path = "Image/car-yellow.png";
 string obstacleImg_path = "Image/car-purple.png";
+string explosionImg_path = "Image/explosion1.png";
 
 constexpr float windowWidth = 600;
 constexpr float windowHeight = 700;
@@ -24,7 +25,7 @@ constexpr float startY = 40.0;
 bool isLeftKeyPressed = false;
 bool isRightKeyPressed = false;
 
-bool vertically = true;
+bool gameover = false;
 
 float loopDuration = 2;
 time_t startTime = clock();
@@ -108,9 +109,13 @@ void Display() {
 	player.Display();
 	if (elapsedTime > obstacleDelay) {
 		obstacle.Display();
-		if (obstacle.Intersect(player))
+		if (obstacle.Intersect(player)){
 			// display red outline of obstacle sprite object if collision occurs
 			Outline(obstacle, 2, vec3(1, 0, 0));
+			explosion.Initialize(explosionImg_path);
+			explosion.Display();
+			gameover = true;
+		}	
 	}
 	glFlush();
 }
@@ -134,7 +139,7 @@ int main(int ac, char** av) {
 	RegisterKeyboard(Keyboard);
 	// event loop
 	glfwSwapInterval(1);
-	while (!glfwWindowShouldClose(w)) {
+	while (!glfwWindowShouldClose(w) && !gameover) {
 		Scroll();
 		Display();
 		glfwSwapBuffers(w);
