@@ -13,7 +13,7 @@ Sprite background, player, obstacle, explosion;
 string backgroundImg_path = "Image/game-bg.png";
 string playerImg_path = "Image/car-yellow.png";
 string obstacleImg_path = "Image/car-purple.png";
-string explosionImg_path = "Image/explosion1.png";
+string explosionImg_path = "Image/explosion2.png";
 
 constexpr float windowWidth = 600;
 constexpr float windowHeight = 700;
