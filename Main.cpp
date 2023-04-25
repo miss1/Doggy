@@ -139,8 +139,10 @@ int main(int ac, char** av) {
 	RegisterKeyboard(Keyboard);
 	// event loop
 	glfwSwapInterval(1);
-	while (!glfwWindowShouldClose(w) && !gameover) {
-		Scroll();
+	while (!glfwWindowShouldClose(w)) {
+		if (!gameover) {
+			Scroll();
+		}
 		Display();
 		glfwSwapBuffers(w);
 		glfwPollEvents();
