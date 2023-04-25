@@ -384,7 +384,7 @@ void LineStrip(int nPoints, vec3 *points, vec3 &color, float opacity, float widt
 
 GLuint quadVBO = 0, quadVAO = 0;
 
-void Quad(vec3 p1, vec3 p2, vec3 p3, vec3 p4, bool solid, vec3 col, float opacity, float lineWidth, GLuint textureName, int textureUnit) {
+void QuadInner(vec3 p1, vec3 p2, vec3 p3, vec3 p4, bool solid, vec3 col, float opacity, float lineWidth, bool texture = false, GLuint textureName = 0, GLuint textureUnit = 0) {
 #ifndef GL_QUADS
 	Triangle(p1, p2, p3, col, col, col, opacity, !solid, col, lineWidth);
 	Triangle(p1, p3, p4, col, col, col, opacity, !solid, col, lineWidth);
@@ -406,8 +406,8 @@ void Quad(vec3 p1, vec3 p2, vec3 p3, vec3 p4, bool solid, vec3 col, float opacit
 	VertexAttribPointer(drawShader, "color", 3, 0, (void *) (4*sizeof(vec3)));
 	SetUniform(drawShader, "opacity", opacity);
 	SetUniform(drawShader, "fadeToCenter", false);
-	SetUniform(drawShader, "useTexture", textureUnit >= 0);
-	if (textureUnit >= 0) {
+	SetUniform(drawShader, "useTexture", texture);
+	if (texture) {
 		glActiveTexture(GL_TEXTURE0+textureUnit);
 		glBindTexture(GL_TEXTURE_2D, textureName);
 		SetUniform(drawShader, "textureImage", textureUnit);
@@ -418,16 +418,20 @@ void Quad(vec3 p1, vec3 p2, vec3 p3, vec3 p4, bool solid, vec3 col, float opacit
 #endif
 }
 
-void Quad(vec3 p1, vec3 p2, vec3 p3, vec3 p4, GLuint textureName, int textureUnit) {
-	Quad(p1, p2, p3, p4, true, vec3(0,0,0), 1, 1, textureName, textureUnit);
+void Quad(vec3 p1, vec3 p2, vec3 p3, vec3 p4, bool solid, vec3 col, float opacity, float lineWidth) {
+	QuadInner(p1, p2, p3, p4, solid, col, opacity, lineWidth, false);
+}
+
+void Quad(vec3 p1, vec3 p2, vec3 p3, vec3 p4, GLuint textureName, GLuint textureUnit) {
+	QuadInner(p1, p2, p3, p4, true, vec3(0,0,0), 1, 1, true, textureName, textureUnit);
 }
 
 void Quad(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4, bool solid, vec3 color, float opacity, float lineWidth) {
-	Quad(vec3((float)x1,(float)y1,0), vec3((float)x2,(float)y2,0), vec3((float)x3,(float)y3,0), vec3((float)x4,(float)y4,0), solid, color, opacity, lineWidth);
+	QuadInner(vec3((float)x1,(float)y1,0), vec3((float)x2,(float)y2,0), vec3((float)x3,(float)y3,0), vec3((float)x4,(float)y4,0), solid, color, opacity, lineWidth);
 }
 
 void Quad(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, bool solid, vec3 color, float opacity, float lineWidth) {
-	Quad(vec3(x1,y1,0), vec3(x2,y2,0), vec3(x3,y3,0), vec3(x4,y4,0), solid, color, opacity, lineWidth);
+	QuadInner(vec3(x1,y1,0), vec3(x2,y2,0), vec3(x3,y3,0), vec3(x4,y4,0), solid, color, opacity, lineWidth);
 }
 
 // Star
