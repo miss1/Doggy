@@ -9,6 +9,8 @@
 #include <stdlib.h>
 #include <vector>
 
+using std::string;
+
 // Screen Mode
 
 void ViewportSize(int &width, int &height) {
@@ -25,12 +27,12 @@ vec4 VP() {
 }
 
 int VPw() {
-	int4 vp = VP();
-	return vp[2];
+	vec4 vp = VP();
+	return (int) vp[2];
 }
 
 int VPh() {
-	int4 vp = VP();
+	vec4 vp = VP();
 	return (int) vp[3];
 }
 
@@ -166,8 +168,9 @@ bool FrontFacing(vec3 base, vec3 vec, mat4 view) {
 int drawShader = 0;
 mat4 drawView;
 
+#ifdef __APPLE__
 const char *drawVShader = R"(
-	#version 410 core // 130
+	#version 410 core
 	in vec3 position;
 	in vec3 color;
 	out vec3 vColor;
@@ -180,9 +183,72 @@ const char *drawVShader = R"(
 		vColor = color;
 	}
 )";
+#else
+const char *drawVShader = R"(
+	#version 130
+	in vec3 position;
+	in vec3 color;
+	out vec3 vColor;
+	out vec2 vUv;
+	uniform mat4 view;
+	void main() {
+		vec2 uvs[] = vec2[4](vec2(0,0), vec2(0,1), vec2(1,1), vec2(1,0));
+		vUv = uvs[gl_VertexID];
+		gl_Position = view*vec4(position, 1);
+		vColor = color;
+	}
+)";
+#endif
+
+#ifdef __APPLE__
+const char *head = "version 410 core";
+#else
+const char *head = "version 130\n";
+#endif
+const char *body = R"(
+	in vec3 vColor;
+	in vec2 vUv;
+	out vec4 pColor;
+	uniform float opacity = 1;
+	uniform bool fadeToCenter = false;
+	uniform bool ring = false;
+	uniform bool useTexture = false;
+	uniform sampler2D textureImage;
+	float Fade(float t) {
+		if (t < .95) return 1;
+		if (t > 1.05) return 0;
+		float a = (t-.95)/(1.05-.95);
+		return 1-smoothstep(0, 1, a);
+			// does smoothstep help?
+	}
+	float Ring(float t) {
+		if (t < .7) return 0;
+		if (t > .9) return 1;
+		float a = (t-.7)/(.9-.7);
+		return smoothstep(0, 1, a);
+	}
+	float DistanceToCenter() {
+		// gl_PointCoord wrt point primitive size
+		float dx = 1-2*gl_PointCoord.x;
+		float dy = 1-2*gl_PointCoord.y;
+		return sqrt(dx*dx+dy*dy);
+	  }
+	void main() {
+		// GL_POINT_SMOOTH deprecated, so calc here
+		// needs GL_POINT_SPRITE or 0x8861 enabled
+		float o = opacity;
+		if (fadeToCenter)
+			o *= Fade(DistanceToCenter());
+		if (ring)
+			o *= Ring(DistanceToCenter());
+		pColor = vec4(useTexture? texture(textureImage, vUv).rgb : vColor, o);		
+	}
+)";
+string drawPShaderString = string(head)+string(body);
+const char *drawPShaderFails = drawPShaderString.c_str();
 
 const char *drawPShader = R"(
-	#version 410 core // 130
+	#version 130 // 410 core ??
 	in vec3 vColor;
 	in vec2 vUv;
 	out vec4 pColor;
@@ -237,6 +303,18 @@ int UseDrawShader(mat4 viewMatrix) {
 	SetUniform(drawShader, "view", viewMatrix);
 	drawView = viewMatrix;
 	return was;
+}
+
+// Defaults
+
+void SetDefaultDisplay(vec3 col) {
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_LINE_SMOOTH);
+	glEnable(GL_MULTISAMPLE);
+	glEnable(GL_DEPTH_TEST);
+	glClearColor(col.x, col.y, col.z, 1);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 // Disks
