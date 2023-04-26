@@ -8,12 +8,15 @@
 #include "IO.h"
 #include "Sprite.h"
 
-Sprite background, player, obstacle, explosion;
+Sprite background, player, obstacle, explosion, menuBG, startBt, endBt;
 
 string backgroundImg_path = "Image/game-bg.png";
 string playerImg_path = "Image/car-yellow.png";
 string obstacleImg_path = "Image/car-purple.png";
 string explosionImg_path = "Image/explosion2.png";
+string menuBG_path = "Image/start-bg-w.png";
+string startBt_path = "Image/button-play.png";
+string endBt_path = "Image/button-exit.png";
 
 constexpr float windowWidth = 600;
 constexpr float windowHeight = 700;
@@ -21,11 +24,15 @@ constexpr float leftBoundary = 140.0;
 constexpr float rightBoundary = 460.0;
 constexpr float startX = 165.0;
 constexpr float startY = 40.0;
+float startBt_x = 150;
+float startBt_y = 350;
+float endBt_x = 450;
+float endBt_y = 350;
 
 bool isLeftKeyPressed = false;
 bool isRightKeyPressed = false;
-
 bool gameover = false;
+bool gamerunning = false;
 
 float loopDuration = 2;
 time_t startTime = clock();
@@ -127,6 +134,13 @@ void Resize(int width, int height) { glViewport(0, 0, width, height); }
 int main(int ac, char** av) {
 	GLFWwindow* w = InitGLFW(200, 200, windowWidth, windowHeight, "Doggy");
 	// read background, foreground, and mat textures
+	menuBG.Initialize(menuBG_path);
+	startBt.Initialize(startBt_path);
+	endBt.Initialize(endBt_path);
+	startBt.SetPosition(getNormalizedPosition(startBt_x, startBt_y));
+	endBt.SetPosition(getNormalizedPosition(endBt_x, endBt_y));
+	startBt.SetScale(0.2f);
+	endBt.SetScale(0.2f);
 	background.Initialize(backgroundImg_path);
 	player.Initialize(playerImg_path);
 	player.SetScale(.1f);
@@ -140,10 +154,19 @@ int main(int ac, char** av) {
 	// event loop
 	glfwSwapInterval(1);
 	while (!glfwWindowShouldClose(w)) {
-		if (!gameover) {
-			Scroll();
+		// display menu
+		if (!gamerunning) {
+			menuBG.Display();
+			startBt.Display();
+			endBt.Display();
 		}
-		Display();
+		else {
+			if (!gameover) {
+				Scroll();
+			}
+			Display();
+
+		}
 		glfwSwapBuffers(w);
 		glfwPollEvents();
 	}
