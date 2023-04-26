@@ -142,10 +142,20 @@ int main(int ac, char** av) {
 	while (!glfwWindowShouldClose(w)) {
 		if (!gameover) {
 			Scroll();
+			Display();
+			glfwSwapBuffers(w);
+			glfwPollEvents();
 		}
-		Display();
-		glfwSwapBuffers(w);
-		glfwPollEvents();
+		else {
+			clock_t start = clock();
+			while ((clock() - start) / CLOCKS_PER_SEC <= 3) {
+				Display();
+				glfwSwapBuffers(w);
+				glfwPollEvents();
+			}
+			break;
+		}
+		
 	}
 	glfwDestroyWindow(w);
 	glfwTerminate();
