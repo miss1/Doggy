@@ -60,6 +60,15 @@ void Scroll() {
 	}
 }
 
+void MouseButton(float x, float y, bool left, bool down) { 
+	if (left && down) {
+		cout << x << ", " << y << endl;
+		if (x >= 95.0f && x <= 200.0f && y >= 290.0f && y <= 410.0f) {
+			gamerunning = true;
+		}
+	}
+}
+
 void Keyboard(int key, int action, bool shift, bool control) {
 	if (key == GLFW_KEY_LEFT) {
 		if (action == GLFW_PRESS) {
@@ -151,6 +160,7 @@ int main(int ac, char** av) {
 	// callbacks
 	RegisterResize(Resize);
 	RegisterKeyboard(Keyboard);
+	RegisterMouseButton(MouseButton);
 	// event loop
 	glfwSwapInterval(1);
 	while (!glfwWindowShouldClose(w)) {
