@@ -8,17 +8,18 @@
 #include "IO.h"
 #include "Sprite.h"
 
-Sprite background, player, obstacle, explosion;
+Sprite background, player, obstacle, explosion, buttonreplay;
 
 string backgroundImg_path = "Image/game-bg.png";
 string playerImg_path = "Image/car-yellow.png";
 string obstacleImg_path = "Image/car-purple.png";
-string explosionImg_path = "Image/explosion2.png";
+string explosionImg_path = "Image/game-over.png";
+string buttonReplay_path = "Image/button-replay.png";
 
 constexpr float windowWidth = 600;
 constexpr float windowHeight = 700;
-constexpr float leftBoundary = 140.0;
-constexpr float rightBoundary = 460.0;
+constexpr float leftBoundary = 0.23 * windowWidth;
+constexpr float rightBoundary = 0.76 * windowWidth;
 constexpr float startX = 165.0;
 constexpr float startY = 40.0;
 
@@ -75,6 +76,18 @@ void Keyboard(int key, int action, bool shift, bool control) {
 	}
 }
 
+void MouseButton(float x, float y, bool left, bool down) { 
+	if (left && down) {
+		if (buttonreplay.Hit(x, y)) {
+			obstacle.SetPosition(getNormalizedPosition(startX, windowHeight));
+			player.SetPosition(getNormalizedPosition(startX, startY));
+			elapsedTime = 0;
+			startTime = clock();
+			gameover = false;
+		}
+	}
+}
+
 void Outline(Sprite& s, float width = 2, vec3 color = vec3(1, 1, 0)) {
 	UseDrawShader(mat4());
 	vec2 pts[] = { s.PtTransform({-1,-1}), s.PtTransform({-1,1}), s.PtTransform({1,1}), s.PtTransform({1,-1}) };
@@ -91,7 +104,7 @@ void Display() {
 	if (isLeftKeyPressed) {
 		vec2 p = player.GetPosition();
 		if (p.x > getNormalizedPosition(leftBoundary, startY).x) {
-			p.x -= 0.005;
+			p.x -= 0.007;
 			player.SetPosition(p);
 		}
 	}
@@ -99,7 +112,7 @@ void Display() {
 	if (isRightKeyPressed) {
 		vec2 p = player.GetPosition();
 		if (p.x < getNormalizedPosition(rightBoundary, startY).x) {
-			p.x += 0.005;
+			p.x += 0.007;
 			player.SetPosition(p);
 		}
 	}
@@ -112,8 +125,8 @@ void Display() {
 		if (obstacle.Intersect(player)){
 			// display red outline of obstacle sprite object if collision occurs
 			Outline(obstacle, 2, vec3(1, 0, 0));
-			explosion.Initialize(explosionImg_path);
 			explosion.Display();
+			buttonreplay.Display();
 			gameover = true;
 		}	
 	}
@@ -134,28 +147,25 @@ int main(int ac, char** av) {
 	obstacle.Initialize(obstacleImg_path);
 	obstacle.SetScale(.1f);
 	obstacle.SetPosition(getNormalizedPosition(startX, windowHeight));
+	explosion.Initialize(explosionImg_path);
+	explosion.SetPosition(vec2(.0f, .45f));
+	explosion.SetScale(.5f);
+	buttonreplay.Initialize(buttonReplay_path);
+	buttonreplay.SetPosition(vec2(.0f, .0f));
+	buttonreplay.SetScale(vec2(0.31f, 0.1f));
 	// callbacks
 	RegisterResize(Resize);
 	RegisterKeyboard(Keyboard);
+	RegisterMouseButton(MouseButton);
 	// event loop
 	glfwSwapInterval(1);
 	while (!glfwWindowShouldClose(w)) {
 		if (!gameover) {
 			Scroll();
-			Display();
-			glfwSwapBuffers(w);
-			glfwPollEvents();
 		}
-		else {
-			clock_t start = clock();
-			while ((clock() - start) / CLOCKS_PER_SEC <= 3) {
-				Display();
-				glfwSwapBuffers(w);
-				glfwPollEvents();
-			}
-			break;
-		}
-		
+		Display();
+		glfwSwapBuffers(w);
+		glfwPollEvents();
 	}
 	glfwDestroyWindow(w);
 	glfwTerminate();
