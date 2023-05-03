@@ -8,7 +8,7 @@
 #include "IO.h"
 #include "Sprite.h"
 
-Sprite background, player, obstacle, explosion, menuBG, startBt, endBt, replayBt;
+Sprite background, player, obstacle, explosion, menuBG, startBt, endBt, replayBt, exitBt;
 
 string backgroundImg_path = "Image/game-bg.png";
 string playerImg_path = "Image/car-yellow.png";
@@ -70,6 +70,9 @@ void MouseButton(float x, float y, bool left, bool down) {
 		}
 		if (replayBt.Hit(x, y)) {
 			StartGame();
+		}
+		if (exitBt.Hit(x, y)) {
+			gamerunning = false;
 		}
 	}
 }
@@ -151,6 +154,7 @@ void DisplayGame() {
 			Outline(obstacle, 2, vec3(1, 0, 0));
 			explosion.Display();
 			replayBt.Display();
+			exitBt.Display();
 			isLeftKeyPressed = false;
 			isRightKeyPressed = false;
 			gameover = true;
@@ -183,6 +187,9 @@ void InitializeGameSprites() {
 	replayBt.Initialize(buttonreplay_path);
 	replayBt.SetPosition(vec2(.0f, .0f));
 	replayBt.SetScale(vec2(0.31f, 0.1f));
+	exitBt.Initialize(endBt_path);
+	exitBt.SetPosition(vec2(.0f, -0.2f));
+	exitBt.SetScale(vec2(0.31f, 0.1f));
 }
 
 // Application
