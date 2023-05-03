@@ -8,7 +8,7 @@
 #include "IO.h"
 #include "Sprite.h"
 
-Sprite background, player, obstacle, explosion, menuBG, startBt, endBt, buttonReplay;
+Sprite background, player, obstacle, explosion, menuBG, startBt, endBt, buttonreplay;
 
 string backgroundImg_path = "Image/game-bg.png";
 string playerImg_path = "Image/car-yellow.png";
@@ -17,7 +17,7 @@ string explosionImg_path = "Image/explosion2.png";
 string menuBG_path = "Image/start-bg-w.png";
 string startBt_path = "Image/button-play.png";
 string endBt_path = "Image/button-exit.png";
-string buttonReplay_path = "Image/button-replay.png";
+string buttonreplay_path = "Image/button-replay.png";
 
 constexpr float windowWidth = 600;
 constexpr float windowHeight = 700;
@@ -164,7 +164,7 @@ int main(int ac, char** av) {
 	explosion.Initialize(explosionImg_path);
 	explosion.SetPosition(vec2(.0f, .45f));
 	explosion.SetScale(.5f);
-	buttonreplay.Initialize(buttonReplay_path);
+	buttonreplay.Initialize(buttonreplay_path);
 	buttonreplay.SetPosition(vec2(.0f, .0f));
 	buttonreplay.SetScale(vec2(0.31f, 0.1f));
 	// callbacks
