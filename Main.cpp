@@ -51,22 +51,25 @@ void Scroll() {
 	}
 }
 
+void StartGame() {
+	obstacle.SetPosition(vec2(startX, 1.0f));
+	player.SetPosition(vec2(startX, startY));
+	elapsedTime = 0;
+	startTime = clock();
+	gameover = false;
+}
+
 void MouseButton(float x, float y, bool left, bool down) { 
 	if (left && down) {
-		cout << x << ", " << y << endl;
 		if (startBt.Hit(x, y)) {
 			gamerunning = true;
-			startTime = clock();
+			StartGame();
 		}
 		if (endBt.Hit(x, y)) {
 			terminateGame = true;
 		}
 		if (replayBt.Hit(x, y)) {
-			obstacle.SetPosition(vec2(startX, 1.0f));
-			player.SetPosition(vec2(startX, startY));
-			elapsedTime = 0;
-			startTime = clock();
-			gameover = false;
+			StartGame();
 		}
 	}
 }
@@ -104,7 +107,17 @@ void Outline(Sprite& s, float width = 2, vec3 color = vec3(1, 1, 0)) {
 		Line(pts[i], pts[(i + 1) % 4], width, color);
 }
 
-void Display() {
+void DisplayMenu() {
+	menuBG.Display();
+	startBt.Display();
+	endBt.Display();
+}
+
+void DisplayGame() {
+	if (!gameover) {
+		Scroll();
+	}
+
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	// glClear(GL_DEPTH_BUFFER_BIT);
@@ -125,11 +138,9 @@ void Display() {
 			player.SetPosition(p);
 		}
 	}
-	time_t now;
-	if (gamerunning) {
-		now = clock();
-		elapsedTime = (float)(now - startTime) / CLOCKS_PER_SEC; // update elapsed time
-	}
+
+	time_t now = clock();
+	elapsedTime = (float)(now - startTime) / CLOCKS_PER_SEC; // update elapsed time
 	
 	background.Display();
 	player.Display();
@@ -143,18 +154,12 @@ void Display() {
 			isLeftKeyPressed = false;
 			isRightKeyPressed = false;
 			gameover = true;
-		}	
+		}
 	}
 	glFlush();
 }
 
-// Application
-
-void Resize(int width, int height) { glViewport(0, 0, width, height); }
-
-int main(int ac, char** av) {
-	GLFWwindow* w = InitGLFW(200, 200, windowWidth, windowHeight, "Doggy");
-	// read background, foreground, and mat textures
+void InitializeMenuSprites() {
 	menuBG.Initialize(menuBG_path);
 	startBt.Initialize(startBt_path);
 	endBt.Initialize(endBt_path);
@@ -162,6 +167,9 @@ int main(int ac, char** av) {
 	endBt.SetPosition(vec2(0.5f, 0.0f));
 	startBt.SetScale(vec2(0.31f, 0.1f));
 	endBt.SetScale(vec2(0.31f, 0.1f));
+}
+
+void InitializeGameSprites() {
 	background.Initialize(backgroundImg_path);
 	player.Initialize(playerImg_path);
 	player.SetScale(.1f);
@@ -175,6 +183,18 @@ int main(int ac, char** av) {
 	replayBt.Initialize(buttonreplay_path);
 	replayBt.SetPosition(vec2(.0f, .0f));
 	replayBt.SetScale(vec2(0.31f, 0.1f));
+}
+
+// Application
+void Resize(int width, int height) { glViewport(0, 0, width, height); }
+
+int main(int ac, char** av) {
+	GLFWwindow* w = InitGLFW(200, 200, windowWidth, windowHeight, "Doggy");
+	
+	// read background, foreground, and mat textures
+	InitializeMenuSprites();
+	InitializeGameSprites();
+
 	// callbacks
 	RegisterResize(Resize);
 	RegisterKeyboard(Keyboard);
@@ -184,16 +204,10 @@ int main(int ac, char** av) {
 	while (!glfwWindowShouldClose(w) && !terminateGame) {
 		// display menu
 		if (!gamerunning) {
-			menuBG.Display();
-			startBt.Display();
-			endBt.Display();
+			DisplayMenu();
 		}
 		else {
-			if (!gameover) {
-				Scroll();
-			}
-			Display();
-
+			DisplayGame();
 		}
 		glfwSwapBuffers(w);
 		glfwPollEvents();
