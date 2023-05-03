@@ -8,7 +8,7 @@
 #include "IO.h"
 #include "Sprite.h"
 
-Sprite background, player, obstacle, explosion, menuBG, startBt, endBt;
+Sprite background, player, obstacle, explosion, menuBG, startBt, endBt, buttonReplay;
 
 string backgroundImg_path = "Image/game-bg.png";
 string playerImg_path = "Image/car-yellow.png";
@@ -17,6 +17,7 @@ string explosionImg_path = "Image/explosion2.png";
 string menuBG_path = "Image/start-bg-w.png";
 string startBt_path = "Image/button-play.png";
 string endBt_path = "Image/button-exit.png";
+string buttonReplay_path = "Image/button-replay.png";
 
 constexpr float windowWidth = 600;
 constexpr float windowHeight = 700;
