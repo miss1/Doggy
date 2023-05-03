@@ -35,7 +35,7 @@ bool gameover = false;
 bool gamerunning = false;
 
 float loopDuration = 2;
-time_t startTime = clock();
+time_t startTime;
 float elapsedTime = 0;
 float vScrollMod = 0;
 float obstacleDelay = 2; // wait till display obstacle (in secs.)
@@ -65,6 +65,7 @@ void MouseButton(float x, float y, bool left, bool down) {
 		cout << x << ", " << y << endl;
 		if (x >= 95.0f && x <= 200.0f && y >= 290.0f && y <= 410.0f) {
 			gamerunning = true;
+			startTime = clock();
 		}
 	}
 }
@@ -119,8 +120,12 @@ void Display() {
 			player.SetPosition(p);
 		}
 	}
-	time_t now = clock();
-	elapsedTime = (float)(now - startTime) / CLOCKS_PER_SEC; // update elapsed time
+	time_t now;
+	if (gamerunning) {
+		now = clock();
+		elapsedTime = (float)(now - startTime) / CLOCKS_PER_SEC; // update elapsed time
+	}
+	
 	background.Display();
 	player.Display();
 	if (elapsedTime > obstacleDelay) {
@@ -148,8 +153,8 @@ int main(int ac, char** av) {
 	endBt.Initialize(endBt_path);
 	startBt.SetPosition(getNormalizedPosition(startBt_x, startBt_y));
 	endBt.SetPosition(getNormalizedPosition(endBt_x, endBt_y));
-	startBt.SetScale(0.2f);
-	endBt.SetScale(0.2f);
+	startBt.SetScale(vec2(0.31f, 0.1f));
+	endBt.SetScale(vec2(0.31f, 0.1f));
 	background.Initialize(backgroundImg_path);
 	player.Initialize(playerImg_path);
 	player.SetScale(.1f);
