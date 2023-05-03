@@ -64,9 +64,16 @@ void Scroll() {
 void MouseButton(float x, float y, bool left, bool down) { 
 	if (left && down) {
 		cout << x << ", " << y << endl;
-		if (x >= 95.0f && x <= 200.0f && y >= 290.0f && y <= 410.0f) {
+		if (startBt.Hit(x, y)) {
 			gamerunning = true;
 			startTime = clock();
+		}
+		if (buttonreplay.Hit(x, y)) {
+			obstacle.SetPosition(getNormalizedPosition(startX, windowHeight));
+			player.SetPosition(getNormalizedPosition(startX, startY));
+			elapsedTime = 0;
+			startTime = clock();
+			gameover = false;
 		}
 	}
 }
