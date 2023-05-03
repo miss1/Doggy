@@ -151,6 +151,8 @@ void Display() {
 			Outline(obstacle, 2, vec3(1, 0, 0));
 			explosion.Display();
 			buttonreplay.Display();
+			isLeftKeyPressed = false;
+			isRightKeyPressed = false;
 			gameover = true;
 		}	
 	}
