@@ -34,6 +34,7 @@ bool isLeftKeyPressed = false;
 bool isRightKeyPressed = false;
 bool gameover = false;
 bool gamerunning = false;
+bool terminateGame = false;
 
 float loopDuration = 2;
 time_t startTime;
@@ -67,6 +68,9 @@ void MouseButton(float x, float y, bool left, bool down) {
 		if (startBt.Hit(x, y)) {
 			gamerunning = true;
 			startTime = clock();
+		}
+		if (endBt.Hit(x, y)) {
+			terminateGame = true;
 		}
 		if (buttonreplay.Hit(x, y)) {
 			obstacle.SetPosition(getNormalizedPosition(startX, windowHeight));
@@ -186,7 +190,7 @@ int main(int ac, char** av) {
 	RegisterMouseButton(MouseButton);
 	// event loop
 	glfwSwapInterval(1);
-	while (!glfwWindowShouldClose(w)) {
+	while (!glfwWindowShouldClose(w) && !terminateGame) {
 		// display menu
 		if (!gamerunning) {
 			menuBG.Display();
