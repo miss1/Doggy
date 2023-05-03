@@ -8,7 +8,7 @@
 #include "IO.h"
 #include "Sprite.h"
 
-Sprite background, player, obstacle, explosion, menuBG, startBt, endBt, buttonreplay;
+Sprite background, player, obstacle, explosion, menuBG, startBt, endBt, replayBt;
 
 string backgroundImg_path = "Image/game-bg.png";
 string playerImg_path = "Image/car-yellow.png";
@@ -21,14 +21,10 @@ string buttonreplay_path = "Image/button-replay.png";
 
 constexpr float windowWidth = 600;
 constexpr float windowHeight = 700;
-constexpr float leftBoundary = 0.23 * windowWidth;
-constexpr float rightBoundary = 0.76 * windowWidth;
-constexpr float startX = 165.0;
-constexpr float startY = 40.0;
-float startBt_x = 150;
-float startBt_y = 350;
-float endBt_x = 450;
-float endBt_y = 350;
+constexpr float leftBoundary = -0.5;
+constexpr float rightBoundary = 0.5;
+constexpr float startX = -0.45;
+constexpr float startY = -0.85;
 
 bool isLeftKeyPressed = false;
 bool isRightKeyPressed = false;
@@ -42,12 +38,6 @@ float elapsedTime = 0;
 float vScrollMod = 0;
 float obstacleDelay = 2; // wait till display obstacle (in secs.)
 
-vec2 getNormalizedPosition(float x, float y) {
-	float x_ndc = 2.0f * x / windowWidth - 1.0f;
-	float y_ndc = 2.0f * y / windowHeight - 1.0f;
-	return vec2(x_ndc, y_ndc);
-}
-
 void Scroll() {
 	// calculate u and v
 	float v = elapsedTime / loopDuration, u = 0;
@@ -57,8 +47,7 @@ void Scroll() {
 	// scroll obstacle with background
 	if (elapsedTime > obstacleDelay) {
 		float obstacleTime = elapsedTime - obstacleDelay;
-		vec2 obstaclePos = getNormalizedPosition(startX, windowHeight - vScrollMod * windowHeight);
-		obstacle.SetPosition(obstaclePos);
+		obstacle.SetPosition(vec2(startX, 1 - vScrollMod * 2));
 	}
 }
 
@@ -72,9 +61,9 @@ void MouseButton(float x, float y, bool left, bool down) {
 		if (endBt.Hit(x, y)) {
 			terminateGame = true;
 		}
-		if (buttonreplay.Hit(x, y)) {
-			obstacle.SetPosition(getNormalizedPosition(startX, windowHeight));
-			player.SetPosition(getNormalizedPosition(startX, startY));
+		if (replayBt.Hit(x, y)) {
+			obstacle.SetPosition(vec2(startX, 1.0f));
+			player.SetPosition(vec2(startX, startY));
 			elapsedTime = 0;
 			startTime = clock();
 			gameover = false;
@@ -123,7 +112,7 @@ void Display() {
 	
 	if (isLeftKeyPressed) {
 		vec2 p = player.GetPosition();
-		if (p.x > getNormalizedPosition(leftBoundary, startY).x) {
+		if (p.x > leftBoundary) {
 			p.x -= 0.007;
 			player.SetPosition(p);
 		}
@@ -131,7 +120,7 @@ void Display() {
 
 	if (isRightKeyPressed) {
 		vec2 p = player.GetPosition();
-		if (p.x < getNormalizedPosition(rightBoundary, startY).x) {
+		if (p.x < rightBoundary) {
 			p.x += 0.007;
 			player.SetPosition(p);
 		}
@@ -150,7 +139,7 @@ void Display() {
 			// display red outline of obstacle sprite object if collision occurs
 			Outline(obstacle, 2, vec3(1, 0, 0));
 			explosion.Display();
-			buttonreplay.Display();
+			replayBt.Display();
 			isLeftKeyPressed = false;
 			isRightKeyPressed = false;
 			gameover = true;
@@ -169,23 +158,23 @@ int main(int ac, char** av) {
 	menuBG.Initialize(menuBG_path);
 	startBt.Initialize(startBt_path);
 	endBt.Initialize(endBt_path);
-	startBt.SetPosition(getNormalizedPosition(startBt_x, startBt_y));
-	endBt.SetPosition(getNormalizedPosition(endBt_x, endBt_y));
+	startBt.SetPosition(vec2(-0.5f, 0.0f));
+	endBt.SetPosition(vec2(0.5f, 0.0f));
 	startBt.SetScale(vec2(0.31f, 0.1f));
 	endBt.SetScale(vec2(0.31f, 0.1f));
 	background.Initialize(backgroundImg_path);
 	player.Initialize(playerImg_path);
 	player.SetScale(.1f);
-	player.SetPosition(getNormalizedPosition(startX, startY));
+	player.SetPosition(vec2(startX, startY));
 	obstacle.Initialize(obstacleImg_path);
 	obstacle.SetScale(.1f);
-	obstacle.SetPosition(getNormalizedPosition(startX, windowHeight));
+	obstacle.SetPosition(vec2(startX, 1.0f));
 	explosion.Initialize(explosionImg_path);
 	explosion.SetPosition(vec2(.0f, .45f));
 	explosion.SetScale(.5f);
-	buttonreplay.Initialize(buttonreplay_path);
-	buttonreplay.SetPosition(vec2(.0f, .0f));
-	buttonreplay.SetScale(vec2(0.31f, 0.1f));
+	replayBt.Initialize(buttonreplay_path);
+	replayBt.SetPosition(vec2(.0f, .0f));
+	replayBt.SetScale(vec2(0.31f, 0.1f));
 	// callbacks
 	RegisterResize(Resize);
 	RegisterKeyboard(Keyboard);
