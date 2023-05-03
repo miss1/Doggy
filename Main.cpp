@@ -133,8 +133,6 @@ void Display() {
 		if (obstacle.Intersect(player)){
 			// display red outline of obstacle sprite object if collision occurs
 			Outline(obstacle, 2, vec3(1, 0, 0));
-			explosion.Initialize(explosionImg_path);
-			explosion.Display();
 			gameover = true;
 		}	
 	}
@@ -162,6 +160,12 @@ int main(int ac, char** av) {
 	obstacle.Initialize(obstacleImg_path);
 	obstacle.SetScale(.1f);
 	obstacle.SetPosition(getNormalizedPosition(startX, windowHeight));
+	explosion.Initialize(explosionImg_path);
+	explosion.SetPosition(vec2(.0f, .45f));
+	explosion.SetScale(.5f);
+	buttonreplay.Initialize(buttonReplay_path);
+	buttonreplay.SetPosition(vec2(.0f, .0f));
+	buttonreplay.SetScale(vec2(0.31f, 0.1f));
 	// callbacks
 	RegisterResize(Resize);
 	RegisterKeyboard(Keyboard);
