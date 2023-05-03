@@ -134,6 +134,8 @@ void Display() {
 		if (obstacle.Intersect(player)){
 			// display red outline of obstacle sprite object if collision occurs
 			Outline(obstacle, 2, vec3(1, 0, 0));
+			explosion.Display();
+			buttonreplay.Display();
 			gameover = true;
 		}	
 	}
