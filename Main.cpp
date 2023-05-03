@@ -72,6 +72,10 @@ void MouseButton(float x, float y, bool left, bool down) {
 }
 
 void Keyboard(int key, int action, bool shift, bool control) {
+	// keyboard logic to control car movement
+	if (gameover) {
+		return;
+	}
 	if (key == GLFW_KEY_LEFT) {
 		if (action == GLFW_PRESS) {
 			isLeftKeyPressed = true;
