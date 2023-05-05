@@ -8,7 +8,7 @@
 #include "IO.h"
 #include "Sprite.h"
 
-Sprite background, player, obstacle, explosion, menuBG, startBt, endBt, replayBt, exitBt;
+Sprite background, player, obstacle, explosion, menuBG, startBt, endBt, replayBt, returnToMenuBt;
 
 string backgroundImg_path = "Image/game-bg.png";
 string playerImg_path = "Image/car-yellow.png";
@@ -31,6 +31,10 @@ bool isRightKeyPressed = false;
 bool gameover = false;
 bool gamerunning = false;
 bool terminateGame = false;
+bool hoveringStartBt = false;
+bool hoveringEndBt = false;
+bool hoveringreplayBt = false;
+bool hoveringreturnToMenuBt = false;
 
 float loopDuration = 2;
 time_t startTime;
@@ -71,10 +75,17 @@ void MouseButton(float x, float y, bool left, bool down) {
 		if (replayBt.Hit(x, y)) {
 			StartGame();
 		}
-		if (exitBt.Hit(x, y)) {
+		if (returnToMenuBt.Hit(x, y)) {
 			gamerunning = false;
 		}
 	}
+}
+
+void MouseMove(float x, float y, bool leftDown, bool rightDown) {
+	hoveringStartBt = startBt.Hit(x, y);
+	hoveringEndBt = endBt.Hit(x, y);
+	hoveringreplayBt = replayBt.Hit(x, y);
+	hoveringreturnToMenuBt = returnToMenuBt.Hit(x, y);
 }
 
 void Keyboard(int key, int action, bool shift, bool control) {
@@ -111,9 +122,18 @@ void Outline(Sprite& s, float width = 2, vec3 color = vec3(1, 1, 0)) {
 }
 
 void DisplayMenu() {
+
 	menuBG.Display();
 	startBt.Display();
 	endBt.Display();
+
+	if (hoveringStartBt) {
+		Outline(startBt);
+	}
+
+	if (hoveringEndBt) {
+		Outline(endBt);
+	}
 }
 
 void DisplayGame() {
@@ -154,10 +174,18 @@ void DisplayGame() {
 			Outline(obstacle, 2, vec3(1, 0, 0));
 			explosion.Display();
 			replayBt.Display();
-			exitBt.Display();
+			returnToMenuBt.Display();
 			isLeftKeyPressed = false;
 			isRightKeyPressed = false;
 			gameover = true;
+
+			if (hoveringreplayBt) {
+				Outline(replayBt);
+			}
+
+			if (hoveringreturnToMenuBt) {
+				Outline(returnToMenuBt);
+			}
 		}
 	}
 	glFlush();
@@ -187,9 +215,9 @@ void InitializeGameSprites() {
 	replayBt.Initialize(buttonreplay_path);
 	replayBt.SetPosition(vec2(.0f, .0f));
 	replayBt.SetScale(vec2(0.31f, 0.1f));
-	exitBt.Initialize(endBt_path);
-	exitBt.SetPosition(vec2(.0f, -0.2f));
-	exitBt.SetScale(vec2(0.31f, 0.1f));
+	returnToMenuBt.Initialize(endBt_path);
+	returnToMenuBt.SetPosition(vec2(.0f, -0.2f));
+	returnToMenuBt.SetScale(vec2(0.31f, 0.1f));
 }
 
 // Application
@@ -206,6 +234,7 @@ int main(int ac, char** av) {
 	RegisterResize(Resize);
 	RegisterKeyboard(Keyboard);
 	RegisterMouseButton(MouseButton);
+	RegisterMouseMove(MouseMove);
 	// event loop
 	glfwSwapInterval(1);
 	while (!glfwWindowShouldClose(w) && !terminateGame) {
