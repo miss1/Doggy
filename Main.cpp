@@ -13,11 +13,12 @@ Sprite background, player, obstacle, explosion, menuBG, startBt, endBt, replayBt
 string backgroundImg_path = "Image/game-bg.png";
 string playerImg_path = "Image/car-yellow.png";
 string obstacleImg_path = "Image/car-purple.png";
-string explosionImg_path = "Image/explosion2.png";
+string explosionImg_path = "Image/game-over.png";
 string menuBG_path = "Image/start-bg-w.png";
 string startBt_path = "Image/button-play.png";
 string endBt_path = "Image/button-exit.png";
-string buttonreplay_path = "Image/button-replay.png";
+string buttonreplay_path = "Image/button-replay1.png";
+string buttonmenu_path = "Image/button-menu.png";
 
 constexpr float windowWidth = 600;
 constexpr float windowHeight = 700;
@@ -214,10 +215,10 @@ void InitializeGameSprites() {
 	explosion.SetScale(.5f);
 	replayBt.Initialize(buttonreplay_path);
 	replayBt.SetPosition(vec2(.0f, .0f));
-	replayBt.SetScale(vec2(0.31f, 0.1f));
-	returnToMenuBt.Initialize(endBt_path);
+	replayBt.SetScale(vec2(0.32f, 0.08f));
+	returnToMenuBt.Initialize(buttonmenu_path);
 	returnToMenuBt.SetPosition(vec2(.0f, -0.2f));
-	returnToMenuBt.SetScale(vec2(0.31f, 0.1f));
+	returnToMenuBt.SetScale(vec2(0.32f, 0.08f));
 }
 
 // Application
