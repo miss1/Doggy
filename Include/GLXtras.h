@@ -10,6 +10,9 @@
 // GLFW
 GLFWwindow *InitGLFW(int x, int y, int width, int height, const char *title, bool antiAlias = true);
 	// call before other GLFW calls
+vec2 MouseCoords();
+	// return mouse coords wrt lower left
+bool KeyDown(int key);
 bool Shift();
 bool Control();
 typedef void(*MouseButtonCallback)(float x, float y, bool left, bool down);
@@ -17,7 +20,7 @@ typedef void(*MouseMoveCallback)(float x, float y, bool leftDown, bool rightDown
 	// x,y with respect to lower-left of window
 typedef void(*MouseWheelCallback)(float spin);
 typedef void(*ResizeCallback)(int width, int height);
-typedef void(*KeyboardCallback)(int key, int action, bool shift, bool control);
+typedef void(*KeyboardCallback)(int key, bool press, bool shift, bool control);
 void RegisterMouseButton(MouseButtonCallback);
 void RegisterMouseMove(MouseMoveCallback);
 void RegisterMouseWheel(MouseWheelCallback);

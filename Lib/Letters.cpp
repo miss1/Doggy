@@ -4,7 +4,6 @@
 #include <glad.h>
 #include "Draw.h"
 #include "GLXtras.h"
-#include "Misc.h"
 #include "IO.h"
 #include "Letters.h"
 #include <stdio.h>

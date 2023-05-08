@@ -12,7 +12,9 @@ namespace {
 
 GLFWwindow *w = NULL;
 
-bool GetKey(int button) { return glfwGetKey(w, button) == GLFW_PRESS; }
+bool GetKey(int button) {
+	return w? glfwGetKey(w, button) == GLFW_PRESS : false;
+}
 
 MouseMoveCallback mmcb = NULL;
 MouseButtonCallback mbcb = NULL;
@@ -27,21 +29,19 @@ double InvertY(GLFWwindow *w, double y) {
 	return h-y;
 }
 
-vec2 MouseCoords(GLFWwindow *w) {
-	// return mouse coords wrt lower left
-	double x, y;
-	glfwGetCursorPos(w, &x, &y);
-	return vec2((float) x, (float) InvertY(w, y));
-}
-
 void MouseButton(GLFWwindow *w, int butn, int action, int mods) {
-	vec2 v = MouseCoords(w);
+	vec2 v = MouseCoords();
 	mbcb(v.x, v.y, butn == GLFW_MOUSE_BUTTON_LEFT, action == GLFW_PRESS);
 }
 
 void MouseMove(GLFWwindow *w, double x, double y) {
 	bool leftDown = glfwGetMouseButton(w, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS;
 	bool rightDown = glfwGetMouseButton(w, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS;
+#ifdef __APPLE__
+	// compensate for "retinal coordinates"
+	x *= 2;
+	y *= 2;
+#endif
 	mmcb((float) x, (float) InvertY(w, y), leftDown, rightDown);
 }
 
@@ -50,7 +50,7 @@ void MouseWheel(GLFWwindow *w, double ignore, double spin) { mwcb((float) spin);
 void Resize(GLFWwindow *w, int width, int height) { rcb(width, height); }
 
 void Keyboard(GLFWwindow *w, int key, int scancode, int action, int mods) {
-	kcb(key, action, mods & GLFW_MOD_SHIFT, mods & GLFW_MOD_CONTROL);
+	kcb(key, action == GLFW_PRESS, mods & GLFW_MOD_SHIFT, mods & GLFW_MOD_CONTROL);
 }
 
 } // end namespace
@@ -58,6 +58,15 @@ void Keyboard(GLFWwindow *w, int key, int scancode, int action, int mods) {
 GLFWwindow *InitGLFW(int x, int y, int width, int height, const char *title, bool aa) {
 	glfwInit();
 	if (aa) glfwWindowHint(GLFW_SAMPLES, 4);
+	#ifdef __APPLE__
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4); // 3);
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1); // 3);
+		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+		glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+	#else
+	//	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4); // KILLS!?
+	//	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+	#endif
 	w = glfwCreateWindow(width, height, title, NULL, NULL);
 	glfwSetWindowPos(w, x, y);
 	glfwMakeContextCurrent(w);
@@ -66,7 +75,24 @@ GLFWwindow *InitGLFW(int x, int y, int width, int height, const char *title, boo
 	return w;
 }
 
+vec2 MouseCoords() {
+	// return mouse coords wrt lower left
+	double x, y;
+	glfwGetCursorPos(w, &x, &y);
+#ifdef __APPLE__
+	// compensate for "retinal coordinates"
+	x *= 2;
+	y *= 2;
+#endif
+	return vec2((float) x, (float) InvertY(w, y));
+}
+
+bool KeyDown(int key) {
+	return GetKey(key);
+}
+
 bool Shift() { return GetKey(GLFW_KEY_LEFT_SHIFT) || GetKey(GLFW_KEY_RIGHT_SHIFT); }
+
 bool Control() { return GetKey(GLFW_KEY_LEFT_CONTROL) || GetKey(GLFW_KEY_RIGHT_CONTROL); }
 
 void RegisterMouseButton(MouseButtonCallback cb) {
