@@ -8,6 +8,8 @@
 #include "IO.h"
 #include "Sprite.h"
 #include "Text.h"
+#include "mmsystem.h"
+#include "windows.h"
 
 Sprite background, player, obstacle, explosion, menuBG, startBt, endBt, replayBt, returnToMenuBt;
 
@@ -65,18 +67,29 @@ void StartGame() {
 	gameover = false;
 }
 
+void playBtnSound() {
+	PlaySoundA("D:/seattle university/code/cpsc5270/Doggy/Audio/btn_click.wav", NULL, SND_ASYNC | SND_NODEFAULT | SND_NOSTOP);
+}
+
 void MouseButton(float x, float y, bool left, bool down) { 
 	if (left && down) {
 		if (startBt.Hit(x, y)) {
+			playBtnSound();
 			gamerunning = true;
 			StartGame();
 		}
-		if (endBt.Hit(x, y))
+		if (endBt.Hit(x, y)) {
+			playBtnSound();
 			terminateGame = true;
-		if (replayBt.Hit(x, y))
+		}
+		if (replayBt.Hit(x, y)) {
+			playBtnSound();
 			StartGame();
-		if (returnToMenuBt.Hit(x, y))
+		}	
+		if (returnToMenuBt.Hit(x, y)) {
+			playBtnSound();
 			gamerunning = false;
+		}
 	}
 }
 
