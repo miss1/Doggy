@@ -68,7 +68,7 @@ void StartGame() {
 }
 
 void playBtnSound() {
-	PlaySoundA("D:/seattle university/code/cpsc5270/Doggy/Audio/btn_click.wav", NULL, SND_ASYNC | SND_NODEFAULT | SND_NOSTOP);
+	PlaySoundA("Audio/btn_click.wav", NULL, SND_ASYNC | SND_NODEFAULT | SND_NOSTOP);
 }
 
 void MouseButton(float x, float y, bool left, bool down) { 
