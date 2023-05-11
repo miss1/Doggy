@@ -15,15 +15,15 @@ Sprite background, player, obstacle, explosion, menuBG, startBt, endBt, replayBt
 
 string dir("Image/");
 // string dir("C:/Users/Jules/Code/GG-Projects/#3-Car-Collision/");
-string backgroundImg_path = dir+"game-bg.png";
-string playerImg_path = dir+"car-yellow.png";
-string obstacleImg_path = dir+"car-purple.png";
-string explosionImg_path = dir+"game-over.png";
-string menuBG_path = dir+"start-bg-w.png";
-string startBt_path = dir+"button-play.png";
-string endBt_path = dir+"button-exit.png";
-string buttonreplay_path = dir+"button-replay1.png";
-string buttonmenu_path = dir+"button-menu.png";
+string backgroundImg_path = dir + "game-bg.png";
+string playerImg_path = dir + "car-yellow.png";
+string obstacleImg_path = dir + "car-purple.png";
+string explosionImg_path = dir + "game-over.png";
+string menuBG_path = dir + "start-bg-w.png";
+string startBt_path = dir + "button-play.png";
+string endBt_path = dir + "button-exit.png";
+string buttonreplay_path = dir + "button-replay1.png";
+string buttonmenu_path = dir + "button-menu.png";
 
 constexpr int windowWidth = 600;
 constexpr int windowHeight = 700;
