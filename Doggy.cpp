@@ -1,5 +1,3 @@
-// Sprite.cpp - 2D display and manipulate texture-mapped quad
-
 #include <glad.h>
 #include <GLFW/glfw3.h>
 #include <time.h>
@@ -24,6 +22,10 @@ string startBt_path = dir + "button-play.png";
 string endBt_path = dir + "button-exit.png";
 string buttonreplay_path = dir + "button-replay1.png";
 string buttonmenu_path = dir + "button-menu.png";
+
+LPCSTR gameOverWav_path = "Audio/game_over.wav";
+LPCSTR bgmWav_path = "Audio/bgm.wav";
+LPCSTR btnClickWav_path = "Audio/btn_click.wav";
 
 constexpr int windowWidth = 600;
 constexpr int windowHeight = 700;
@@ -65,10 +67,11 @@ void StartGame() {
 	elapsedTime = 0;
 	startTime = clock();
 	gameover = false;
+	PlaySoundA(bgmWav_path, NULL, SND_ASYNC | SND_NODEFAULT | SND_LOOP);
 }
 
 void playBtnSound() {
-	PlaySoundA("Audio/btn_click.wav", NULL, SND_ASYNC | SND_NODEFAULT | SND_NOSTOP);
+	PlaySoundA(btnClickWav_path, NULL, SND_SYNC | SND_NODEFAULT | SND_NOSTOP);
 }
 
 void MouseButton(float x, float y, bool left, bool down) { 
@@ -146,7 +149,10 @@ void DisplayGame() {
 	background.Display();
 	player.Display();
 	// display time
-	Text(20, windowHeight - 40, vec3(1,0,0), 16, "%3.1f", elapsedTime);
+	Text(10, windowHeight - 40, vec3(0, 1, 0), 13, "%s", "Score:");
+	Text(90, windowHeight - 40, vec3(0,1,0), 13, "%3.1f", elapsedTime);
+	Text(windowWidth - 120, windowHeight - 40, vec3(0, 1, 0), 13, "%s", "Best:");
+	Text(windowWidth - 60, windowHeight - 40, vec3(0, 1, 0), 13, "%3.1f", elapsedTime);
 	if (elapsedTime > obstacleDelay) {
 		obstacle.Display();
 		if (obstacle.Intersect(player)){
@@ -155,6 +161,12 @@ void DisplayGame() {
 			explosion.Display();
 			replayBt.Display();
 			returnToMenuBt.Display();
+			Text(windowWidth / 2 - 80, windowHeight / 2, vec3(1, 0, 0), 16, "%s", "Your score");
+			Text(windowWidth / 2 - 30, windowHeight / 2 - 25, vec3(1, 0, 0), 16, "%3.1f", elapsedTime);
+			if (!gameover) {
+				PlaySoundA(NULL, NULL, 0);
+				PlaySoundA(gameOverWav_path, NULL, SND_ASYNC | SND_NODEFAULT | SND_NOSTOP);
+			}
 			gameover = true;
 
 			if (hoveringreplayBt) 
@@ -200,10 +212,10 @@ void InitializeGameSprites() {
 	explosion.SetPosition(vec2(.0f, .45f));
 	explosion.SetScale(.5f);
 	replayBt.Initialize(buttonreplay_path);
-	replayBt.SetPosition(vec2(.0f, .0f));
+	replayBt.SetPosition(vec2(.0f, -0.2f));
 	replayBt.SetScale(vec2(0.32f, 0.08f));
 	returnToMenuBt.Initialize(buttonmenu_path);
-	returnToMenuBt.SetPosition(vec2(.0f, -0.2f));
+	returnToMenuBt.SetPosition(vec2(.0f, -0.4f));
 	returnToMenuBt.SetScale(vec2(0.32f, 0.08f));
 }
 
@@ -212,7 +224,8 @@ void InitializeGameSprites() {
 void Resize(int width, int height) { glViewport(0, 0, width, height); }
 
 int main(int ac, char** av) {
-	GLFWwindow* w = InitGLFW(200, 200, windowWidth, windowHeight, "Doggy");
+	GLFWwindow* w = InitGLFW(450, 200, windowWidth, windowHeight, "Doggy");
+	glfwSetWindowSizeLimits(w, 450, 200, windowWidth, windowHeight);
 	
 	// read background, foreground, and mat textures
 	InitializeMenuSprites();
