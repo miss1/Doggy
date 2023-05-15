@@ -23,9 +23,12 @@ string endBt_path = dir + "button-exit.png";
 string buttonreplay_path = dir + "button-replay1.png";
 string buttonmenu_path = dir + "button-menu.png";
 
-LPCSTR gameOverWav_path = "Audio/game_over.wav";
-LPCSTR bgmWav_path = "Audio/bgm.wav";
-LPCSTR btnClickWav_path = "Audio/btn_click.wav";
+// audio file path
+const char* gameOverWav_path = "Audio/mixkit-truck-crash-with-explosion-1616.wav";
+const char* bgmWav_path = "Audio/bgm.wav";
+const char* btnClickWav_path = "Audio/mixkit-car-door-slam-1564.wav";
+wchar_t const* menuBgMusic_path = L"Audio/Bush - The People That We Love (Instrumental).wav";
+const char* carSoundEffect_path = "Audio/Lexus Lf-a Sound.wav";
 
 constexpr int windowWidth = 600;
 constexpr int windowHeight = 700;
@@ -41,8 +44,9 @@ bool hoveringStartBt = false;
 bool hoveringEndBt = false;
 bool hoveringreplayBt = false;
 bool hoveringreturnToMenuBt = false;
+bool isPlayMenuBgMusic = false;
 
-float loopDuration = 2;
+float loopDuration = 10;
 time_t startTime;
 float elapsedTime = 0; // in seconds
 float vScrollMod = 0;
@@ -61,17 +65,28 @@ void Scroll() {
 	}
 }
 
+void playCarSoundEffect() {
+	PlaySoundA(carSoundEffect_path, NULL, SND_ASYNC | SND_NODEFAULT | SND_LOOP);
+}
+
 void StartGame() {
 	obstacle.SetPosition(vec2(startX, 1.0f));
 	player.SetPosition(vec2(startX, startY));
 	elapsedTime = 0;
 	startTime = clock();
 	gameover = false;
-	PlaySoundA(bgmWav_path, NULL, SND_ASYNC | SND_NODEFAULT | SND_LOOP);
+	// play bg music and car sound effect
+	playCarSoundEffect();
 }
 
 void playBtnSound() {
 	PlaySoundA(btnClickWav_path, NULL, SND_SYNC | SND_NODEFAULT | SND_NOSTOP);
+}
+
+void playMenuBgMusic() {
+	//PlaySoundA(menuBgMusic_path, NULL, SND_SYNC | SND_NODEFAULT | SND_NOSTOP);
+	cout << "playing menu bg music..." << endl;
+	PlaySound(menuBgMusic_path, NULL, SND_ASYNC | SND_FILENAME | SND_NOSTOP);
 }
 
 void MouseButton(float x, float y, bool left, bool down) { 
@@ -139,6 +154,7 @@ void DisplayMenu() {
 	menuBG.Display();
 	startBt.Display();
 	endBt.Display();
+	playMenuBgMusic();
 	if (hoveringStartBt)
 		Outline(startBt);
 	if (hoveringEndBt)
@@ -148,11 +164,13 @@ void DisplayMenu() {
 void DisplayGame() {
 	background.Display();
 	player.Display();
+
 	// display time
 	Text(10, windowHeight - 40, vec3(0, 1, 0), 13, "%s", "Score:");
 	Text(90, windowHeight - 40, vec3(0,1,0), 13, "%3.1f", elapsedTime);
 	Text(windowWidth - 120, windowHeight - 40, vec3(0, 1, 0), 13, "%s", "Best:");
 	Text(windowWidth - 60, windowHeight - 40, vec3(0, 1, 0), 13, "%3.1f", elapsedTime);
+
 	if (elapsedTime > obstacleDelay) {
 		obstacle.Display();
 		if (obstacle.Intersect(player)){
