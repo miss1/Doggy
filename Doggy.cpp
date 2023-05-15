@@ -225,7 +225,7 @@ void InitializeGameSprites() {
 	player.SetPosition(vec2(startX, startY));
 	obstacle.Initialize(obstacleImg_path);
 	obstacle.SetScale(.1f);
-	obstacle.SetPosition(vec2(startX, 1.0f));
+	obstacle.SetPosition(vec2(startX, 1.5f));
 	explosion.Initialize(explosionImg_path);
 	explosion.SetPosition(vec2(.0f, .45f));
 	explosion.SetScale(.5f);
