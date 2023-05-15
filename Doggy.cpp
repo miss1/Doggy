@@ -67,6 +67,7 @@ void Scroll() {
 	// every 2s reduce loop duration to 80% of its current size
 	if (fmod(elapsedTime, 2.0f) == 0.0f) {
 		loopDuration *= 0.8f;
+		cout << "loop duration reduced!" << endl;
 	}
 }
 
