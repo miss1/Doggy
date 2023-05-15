@@ -9,13 +9,23 @@
 #include "mmsystem.h"
 #include "windows.h"
 
-Sprite background, player, obstacle, explosion, menuBG, startBt, endBt, replayBt, returnToMenuBt;
+Sprite background, player, explosion, menuBG, startBt, endBt, replayBt, returnToMenuBt;
+Sprite* intersected = NULL;
+
+// obstacle attributes
+//const char* obstacleName = "car-red.png";
+const char* obstacleNames[] = { "car-blue.png", "car-green.png", "car-purple.png" };
+const int nObstacles = sizeof(obstacleNames) / sizeof(const char*);
+//float obstacleDelay = 2; // wait till display obstacle (in secs.)
+float obstacleDelays[] = { 3.5f, 5.7f, 8.0f };
+float obstacleStartXs[] = {-0.3f, 0.0f, 0.3f};
+vector<Sprite> obstacles(nObstacles);
 
 string dir("Image/");
 // string dir("C:/Users/Jules/Code/GG-Projects/#3-Car-Collision/");
 string backgroundImg_path = dir + "game-bg.png";
 string playerImg_path = dir + "car-yellow.png";
-string obstacleImg_path = dir + "car-purple.png";
+//string obstacleImg_path = dir + "car-purple.png";
 string explosionImg_path = dir + "game-over.png";
 string menuBG_path = dir + "start-bg-w.png";
 string startBt_path = dir + "button-play.png";
@@ -23,9 +33,9 @@ string endBt_path = dir + "button-exit.png";
 string buttonreplay_path = dir + "button-replay1.png";
 string buttonmenu_path = dir + "button-menu.png";
 
-LPCSTR gameOverWav_path = "Audio/game_over.wav";
-LPCSTR bgmWav_path = "Audio/bgm.wav";
-LPCSTR btnClickWav_path = "Audio/btn_click.wav";
+const char* gameOverWav_path = "Audio/game_over.wav";
+const char* bgmWav_path = "Audio/bgm.wav";
+const char* btnClickWav_path = "Audio/btn_click.wav";
 
 constexpr int windowWidth = 600;
 constexpr int windowHeight = 700;
@@ -46,7 +56,6 @@ float loopDuration = 2;
 time_t startTime;
 float elapsedTime = 0; // in seconds
 float vScrollMod = 0;
-float obstacleDelay = 2; // wait till display obstacle (in secs.)
 
 void Scroll() {
 	// calculate u and v
@@ -55,14 +64,17 @@ void Scroll() {
 	// transform u and v
 	background.uvTransform = Translate(u, v, 0);
 	// scroll obstacle with background
-	if (elapsedTime > obstacleDelay) {
-		float obstacleTime = elapsedTime - obstacleDelay;
-		obstacle.SetPosition(vec2(startX, 1 - vScrollMod * 2));
-	}
+	//if (elapsedTime > obstacleDelay)
+		//obstacle.SetPosition(vec2(startX, 1 - vScrollMod * 2));
+	for (int i = 0; i < nObstacles; i++) 
+		if (elapsedTime > obstacleDelays[i])
+			obstacles[i].SetPosition(vec2(obstacleStartXs[i], 1 - vScrollMod * 2));
 }
 
 void StartGame() {
-	obstacle.SetPosition(vec2(startX, 1.0f));
+	//obstacle.SetPosition(vec2(startX, 1.0f));
+	for (int i = 0; i < nObstacles; i++)
+		obstacles[i].SetPosition(vec2(startX, 1.0f));
 	player.SetPosition(vec2(startX, startY));
 	elapsedTime = 0;
 	startTime = clock();
@@ -153,25 +165,33 @@ void DisplayGame() {
 	Text(90, windowHeight - 40, vec3(0,1,0), 13, "%3.1f", elapsedTime);
 	Text(windowWidth - 120, windowHeight - 40, vec3(0, 1, 0), 13, "%s", "Best:");
 	Text(windowWidth - 60, windowHeight - 40, vec3(0, 1, 0), 13, "%3.1f", elapsedTime);
-	if (elapsedTime > obstacleDelay) {
-		obstacle.Display();
-		if (obstacle.Intersect(player)){
-			// display red outline of obstacle sprite object if collision occurs
-			Outline(obstacle, 2, vec3(1, 0, 0));
-			explosion.Display();
-			replayBt.Display();
-			returnToMenuBt.Display();
-			Text(windowWidth / 2 - 80, windowHeight / 2, vec3(1, 0, 0), 16, "%s", "Your score");
-			Text(windowWidth / 2 - 30, windowHeight / 2 - 25, vec3(1, 0, 0), 16, "%3.1f", elapsedTime);
+		// display obstacle
+		//obstacle.Display();
+		for (Sprite& s : obstacles)
+			s.Display();
+		// test for intersection
+		if (!gameover) {
+			//if (obstacle.Intersect(player))
+			//	intersected = &obstacle;
+			for (int i = 0; i < nObstacles; i++)
+				if (!intersected && elapsedTime > obstacleDelays[i] && obstacles[i].Intersect(player)) {
+					intersected = &obstacles[i];
+		}
+		if (gameover || intersected){
 			if (!gameover) {
 				PlaySoundA(NULL, NULL, 0);
 				PlaySoundA(gameOverWav_path, NULL, SND_ASYNC | SND_NODEFAULT | SND_NOSTOP);
 			}
 			gameover = true;
-
+			// display red outline of obstacle sprite object if collision occurs
+			Outline(*intersected, 2, vec3(1, 0, 0));
+			explosion.Display();
+			replayBt.Display();
+			returnToMenuBt.Display();
+			Text(windowWidth / 2 - 80, windowHeight / 2, vec3(1, 0, 0), 16, "%s", "Your score");
+			Text(windowWidth / 2 - 30, windowHeight / 2 - 25, vec3(1, 0, 0), 16, "%3.1f", elapsedTime);
 			if (hoveringreplayBt) 
 				Outline(replayBt);
-
 			if (hoveringreturnToMenuBt)
 				Outline(returnToMenuBt);
 		}
@@ -199,15 +219,24 @@ void InitializeMenuSprites() {
 	endBt.SetScale(vec2(0.31f, 0.1f));
 }
 
+void InitializeObstacle(Sprite& s, const char* name, float startX) {
+	s.Initialize(dir+string(name));
+	s.SetScale(.1f);
+	s.SetPosition(vec2(startX, 1.0f));
+}
+
 // Make Game Scene
 void InitializeGameSprites() {
 	background.Initialize(backgroundImg_path);
 	player.Initialize(playerImg_path);
 	player.SetScale(.1f);
 	player.SetPosition(vec2(startX, startY));
-	obstacle.Initialize(obstacleImg_path);
-	obstacle.SetScale(.1f);
-	obstacle.SetPosition(vec2(startX, 1.0f));
+	//InitializeObstacle(obstacle, obstacleName, startX);
+	for (int i = 0; i < nObstacles; i++)
+		InitializeObstacle(obstacles[i], obstacleNames[i], obstacleStartXs[i]);
+	//obstacle.Initialize(obstacleImg_path);
+	//obstacle.SetScale(.1f);
+	//obstacle.SetPosition(vec2(startX, 1.0f));
 	explosion.Initialize(explosionImg_path);
 	explosion.SetPosition(vec2(.0f, .45f));
 	explosion.SetScale(.5f);
