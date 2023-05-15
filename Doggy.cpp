@@ -49,6 +49,7 @@ bool isPlayMenuBgMusic = false;
 float loopDuration = 10;
 time_t startTime;
 float elapsedTime = 0; // in seconds
+int timeCounter = 0;
 float vScrollMod = 0;
 float obstacleDelay = 2; // wait till display obstacle (in secs.)
 
@@ -62,6 +63,10 @@ void Scroll() {
 	if (elapsedTime > obstacleDelay) {
 		float obstacleTime = elapsedTime - obstacleDelay;
 		obstacle.SetPosition(vec2(startX, 1 - vScrollMod * 2));
+	}
+	// every 2s reduce loop duration to 80% of its current size
+	if (fmod(elapsedTime, 2.0f) == 0.0f) {
+		loopDuration *= 0.8f;
 	}
 }
 
