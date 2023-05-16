@@ -302,8 +302,8 @@ void InitializeGameSprites() {
 	explosion.SetPosition(vec2(.0f, .45f));
 	explosion.SetScale(.5f);
 	congratz.Initialize(congratz_path);
-	congratz.SetPosition(vec2(.0f, -.45f));
-	congratz.SetScale(1.0f);
+	congratz.SetPosition(vec2(.0f, -.5f));
+	congratz.SetScale(vec2(0.44f, 0.1f));
 	replayBt.Initialize(buttonreplay_path);
 	replayBt.SetPosition(vec2(.0f, -0.2f));
 	replayBt.SetScale(vec2(0.32f, 0.08f));
