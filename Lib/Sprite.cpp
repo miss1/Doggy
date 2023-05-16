@@ -17,33 +17,18 @@ GLuint spriteShader = 0, spriteCollisionShader = 0;
 namespace SpriteSpace {
 
 int BuildSpriteShader(bool collisionTest = false) {
-	const char *vShaderQ = R"(
+	const char *vShader = R"(
 		#version 330
 		uniform mat4 view;
 		uniform float z = 0;
 		out vec2 uv;
 		void main() {
-			const vec2 pts[4] = vec2[4](vec2(-1,-1), vec2(-1,1), vec2(1,1), vec2(1,-1));
+			// works for 1 quad or 2 tris
+			const vec2 pts[6] = vec2[6](vec2(-1,-1), vec2(1,-1), vec2(1,1), vec2(-1,1), vec2(-1,-1), vec2(1,1));
 			uv = (vec2(1,1)+pts[gl_VertexID])/2;
 			gl_Position = view*vec4(pts[gl_VertexID], z, 1);
 		}
 	)";
-	const char *vShaderT = R"(
-		#version 330
-		uniform mat4 view;
-		uniform float z = 0;
-		out vec2 uv;
-		void main() {
-			const vec2 pts[6] = vec2[6](vec2(-1,-1), vec2(-1,1), vec2(1,1), vec2(-1,-1), vec2(1,1), vec2(1,-1));
-			uv = (vec2(1,1)+pts[gl_VertexID])/2;
-			gl_Position = view*vec4(pts[gl_VertexID], z, 1);
-		}
-	)";
-	#ifdef GL_QUADS
-		const char *vShader = vShaderQ;
-	#else
-		const char *vShader = vShaderT;
-	#endif
 	const char *pShader = R"(
 		#version 330
 		in vec2 uv;
@@ -122,7 +107,7 @@ bool CrossPositive(vec2 a, vec2 b, vec2 c) { return cross(vec2(b-a), vec2(c-b)) 
 
 vector<int> clearOccupy, clearCollide;
 int nCollisionSprites = 0;
-GLuint countersBuf = 0, atomicCollideBuffer = 0;
+GLuint countersBuf = 0;
 
 void ResetCounter() {
 	GLuint count = 0;
@@ -173,6 +158,7 @@ void ClearOccupyAndCounter(int nsprites) {
 	glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, w*h*sizeof(int), clearOccupy.data());
 	// collision buffer
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, collideBinding, collideBuffer);
+//	glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, clearCollide.size()*sizeof(int), clearCollide.data());
 	glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, nsprites*sizeof(int), clearCollide.data());
 	// atomic counter
 	ResetCounter();
@@ -192,7 +178,8 @@ int TestCollisions(vector<Sprite *> &sprites) {
 		nCollisionSprites = nsprites;
 		InitCollisionShaderStorage(nsprites);
 	}
-	else ClearOccupyAndCounter(nsprites);
+//	else
+		ClearOccupyAndCounter(nsprites);
 	vector<Sprite *> tmp = sprites;
 	for (int i = 0; i < nsprites; i++)
 		tmp[i]->id = i;
@@ -216,13 +203,13 @@ int TestCollisions(vector<Sprite *> &sprites) {
 	return ReadCounter();
 }
 
-bool Sprite::Intersect(Sprite &s) {
+bool Intersect(mat4 m1, mat4 m2) {
 	vec2 pts[] = { {-1,-1}, {-1,1}, {1,1}, {1,-1} };
 	float x1min = FLT_MAX, x1max = -FLT_MAX, y1min = FLT_MAX, y1max = -FLT_MAX;
 	float x2min = FLT_MAX, x2max = -FLT_MAX, y2min = FLT_MAX, y2max = -FLT_MAX;
 	for (int i = 0; i < 4; i++) {
-		vec2 p1 = PtTransform(pts[i]);
-		vec2 p2 = s.PtTransform(pts[i]);
+		vec2 p1 = vec2(m1*vec4(pts[i], 0, 1));
+		vec2 p2 = vec2(m2*vec4(pts[i], 0, 1));
 		x1min = min(x1min, p1.x); x1max = max(x1max, p1.x);
 		y1min = min(y1min, p1.y); y1max = max(y1max, p1.y);
 		x2min = min(x2min, p2.x); x2max = max(x2max, p2.x);
@@ -233,30 +220,43 @@ bool Sprite::Intersect(Sprite &s) {
 	return !xNoOverlap && !yNoOverlap;
 }
 
-void Sprite::Initialize(GLuint texName, float z) { //, bool invVrt) {
+bool Sprite::Intersect(Sprite &s) {
+	return ::Intersect(ptTransform, s.ptTransform);
+}
+
+void Sprite::Initialize(GLuint texName, float z) {
 	this->z = z;
 	textureName = texName;
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
 }
 
-void Sprite::Initialize(string imageFile, float z) { //, bool invVrt) {
+void Sprite::Initialize(string imageFile, float z) {
 	this->z = z;
 	textureName = ReadTexture(imageFile.c_str(), true, &nTexChannels, &imgWidth, &imgHeight);
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
 }
 
-void Sprite::Initialize(string imageFile, string matFile, float z) { //, bool invVrt) {
-	Initialize(imageFile, z); // , invVrt);
+void Sprite::Initialize(string imageFile, string matFile, float z) {
+	Initialize(imageFile, z);
 	matName = ReadTexture(matFile.c_str());
 }
 
-void Sprite::Initialize(vector<string> &imageFiles, string matFile, float z) { //, bool invVrt) {
+void Sprite::Initialize(vector<string> &imageFiles, string matFile, float z) {
 	this->z = z;
 	nFrames = imageFiles.size();
-	textureNames.resize(nFrames);
-	for (size_t i = 0; i < nFrames; i++)
-		textureNames[i] = ReadTexture(imageFiles[i].c_str());
+	images.resize(nFrames);
+	for (size_t i = 0; i < nFrames; i++) {
+		int nTexChannels;
+		GLuint textureName = ReadTexture(imageFiles[i].c_str(), true, &nTexChannels);
+		images[i] = ImageInfo(textureName, nTexChannels);
+	}
 	if (!matFile.empty())
 		matName = ReadTexture(matFile.c_str());
 	change = clock()+(time_t)(frameDuration*CLOCKS_PER_SEC);
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
 }
 
 bool Sprite::Hit(double x, double y) {
@@ -327,8 +327,16 @@ int GetSpriteShader() {
 	return spriteShader;
 }
 
+void Sprite::Outline(vec3 color, float width) {
+	UseDrawShader(mat4());
+	vec2 pts[] = { PtTransform({-1,-1}), PtTransform({-1,1}), PtTransform({1,1}), PtTransform({1,-1}) };
+	for (int i = 0; i < 4; i++)
+		Line(pts[i], pts[(i+1)%4], width, color);
+}
+
 void Sprite::Display(mat4 *fullview, int textureUnit) {
 	int s = CurrentProgram();
+	glBindVertexArray(vao);
 	if (s <= 0 || (s != spriteShader && s != spriteCollisionShader))
 		s = SpriteSpace::GetShader();
 	glUseProgram(s);
@@ -339,12 +347,16 @@ void Sprite::Display(mat4 *fullview, int textureUnit) {
 			frame = (frame+1)%nFrames;
 			change = now+(time_t)(frameDuration*CLOCKS_PER_SEC);
 		}
-		glBindTexture(GL_TEXTURE_2D, textureNames[frame]);
+		ImageInfo i = images[frame];
+		glBindTexture(GL_TEXTURE_2D, i.textureName);
+		SetUniform(s, "nTexChannels", i.nTexChannels);
 	}
-	else glBindTexture(GL_TEXTURE_2D, textureName);
+	else {
+		glBindTexture(GL_TEXTURE_2D, textureName);
+		SetUniform(s, "nTexChannels", nTexChannels);
+	}
 	SetUniform(s, "textureImage", (int) textureUnit);
 	SetUniform(s, "useMat", matName > 0);
-	SetUniform(s, "nTexChannels", nTexChannels);
 	SetUniform(s, "z", z);
 	if (matName > 0) {
 		glActiveTexture(GL_TEXTURE0+textureUnit+1);
@@ -353,11 +365,11 @@ void Sprite::Display(mat4 *fullview, int textureUnit) {
 	}
 	SetUniform(s, "view", fullview? *fullview*ptTransform : ptTransform);
 	SetUniform(s, "uvTransform", uvTransform);
-#ifdef GL_QUADS
-	glDrawArrays(GL_QUADS, 0, 4);
-#else
+//#ifdef GL_QUADS
+//	glDrawArrays(GL_QUADS, 0, 4);
+//#else
 	glDrawArrays(GL_TRIANGLES, 0, 6);
-#endif
+//#endif
 }
 
 void Sprite::SetFrameDuration(float dt) { frameDuration = dt; }

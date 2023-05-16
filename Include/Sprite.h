@@ -12,23 +12,34 @@ using namespace std;
 
 // Sprite Class
 
+class ImageInfo {
+public:
+	GLuint textureName;
+	int nTexChannels;
+	ImageInfo(GLuint t = 0, int n = 0) : textureName(t), nTexChannels(n) { }
+};
+
 class Sprite {
 public:
-	vec2 position, scale = vec2(1, 1), mouseDown, oldMouse;
+	GLuint vao = 0;
+	vec2 position, scale = vec2(1, 1);
 	float z = 0; // in device coordinates (+/-1)
+	vec2 mouseDown, oldMouse;
 	float rotation = 0;
 	int winWidth = 0, winHeight = 0;
 	int imgWidth = 0, imgHeight = 0;
-	int nTexChannels = 0;
 	// for collision:
 	int id = 0;
 	vector<int> collided;
-	// for animation:
+	// single image
+	int nTexChannels = 0;
+	GLuint textureName = 0, matName = 0;
+	// multiple images
 	GLuint frame = 0, nFrames = 0;
-	vector<GLuint> textureNames;
+	vector<ImageInfo> images;
 	float frameDuration = 1.5f;
 	time_t change;
-	GLuint textureName = 0, matName = 0;
+	// transformations
 	mat4 ptTransform, uvTransform;
 	bool Intersect(Sprite &s);
 	void UpdateTransform();
@@ -49,6 +60,7 @@ public:
 	void SetPtTransform(mat4 m);
 	void SetUvTransform(mat4 m);
 	void Display(mat4 *view = NULL, int textureUnit = 0);
+	void Outline(vec3 color, float width = 2);
 	void Release();
 	void SetFrameDuration(float dt); // if animating
 	Sprite(vec2 p = vec2(), float s = 1, bool invVrt = true) : position(p), scale(vec2(s, s)) { UpdateTransform(); }
@@ -59,5 +71,6 @@ public:
 void BuildSpriteShader();
 int GetSpriteShader();
 int TestCollisions(vector<Sprite *> &sprites);
+bool Intersect(mat4 m1, mat4 m2);
 
 #endif
