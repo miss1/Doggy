@@ -143,7 +143,7 @@ void Scroll() {
 	// move active obstacle(s) with background
 	for (int i = 0; i < nObstacles; i++)
 		if (elapsedTime > obstacleDelays[i]) {
-			float obstacleScrollTime = elapsedTime-obstacleDelays[i];
+			float obstacleScrollTime = elapsedTime - obstacleDelays[i];
 			float vObstacle = fmod(obstacleScrollTime/loopDuration, 1.f);
 			if (1 - 2 * vObstacle <= -0.99) {
 				float last = obstacleStartXs[3];
@@ -158,13 +158,13 @@ void Scroll() {
 
 void Animate() {
 	if (!gameover) {
-		elapsedTime = (float)(clock()-startTime)/CLOCKS_PER_SEC;
+		elapsedTime = (float)(clock() - startTime)/CLOCKS_PER_SEC;
 		Scroll();
 		vec2 p = player.GetPosition();
 		if (KeyDown(GLFW_KEY_LEFT) && p.x > leftBoundary)
-			player.SetPosition(vec2(p.x-.007f, p.y));
+			player.SetPosition(vec2(p.x - .007f, p.y));
 		if (KeyDown(GLFW_KEY_RIGHT) && p.x < rightBoundary)
-			player.SetPosition(vec2(p.x+.007f, p.y));
+			player.SetPosition(vec2(p.x + .007f, p.y));
 	}
 }
 
@@ -183,11 +183,13 @@ void DisplayMenu() {
 void DisplayGame() {
 	background.Display();
 	player.Display();
+
 	// display time
 	Text(10, windowHeight-40, green, 13, "%s", "Score:");
 	Text(90, windowHeight-40, green, 13, "%3.1f", elapsedTime);
 	Text(windowWidth-120, windowHeight-40, green, 13, "%s", "Best:");
 	Text(windowWidth-60, windowHeight-40, green, 13, "%3.1f", elapsedTime);
+
 	// display obstacles
 	for (Sprite &s : obstacles)
 		s.Display();
@@ -205,7 +207,7 @@ void DisplayGame() {
 		}
 		gameover = true;
 		// display red outline of obstacle sprite object if collision occurs
-		intersected->Outline(red, 2);
+		intersected -> Outline(red, 2);
 		explosion.Display();
 		replayBt.Display();
 		returnToMenuBt.Display();
