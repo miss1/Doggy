@@ -20,7 +20,7 @@ int windowWidth = 600, windowHeight = 700;
 vec3 red(1, 0, 0), green(0, 1, 0), yellow(1, 1, 0);
 
 // sprites
-Sprite background, player, explosion, menuBG, startBt, endBt, replayBt, returnToMenuBt;
+Sprite background, player, explosion, newRecord, menuBG, startBt, endBt, replayBt, returnToMenuBt;
 Sprite *intersected = NULL;
 vector<Sprite> obstacles;
 
@@ -40,6 +40,7 @@ string startBt_path = dir+"button-play.png";
 string endBt_path = dir+"button-exit.png";
 string buttonreplay_path = dir+"button-replay1.png";
 string buttonmenu_path = dir+"button-menu.png";
+string newRecordImg_path = dir + "new_record.png";
 string gameRecordFileName = "game_record.txt";
 
 // audio file path
@@ -250,6 +251,7 @@ void DisplayGame() {
 		// compare the current time to game record
 		if (elapsedTime > curRecord) {
 			writeGameRecord();
+			newRecord.Display();
 		}
 		// display player socre
 		Text(windowWidth/2-80, windowHeight/2, red, 16, "%s", "Your score");
@@ -299,6 +301,9 @@ void InitializeGameSprites() {
 	explosion.Initialize(explosionImg_path);
 	explosion.SetPosition(vec2(.0f, .45f));
 	explosion.SetScale(.5f);
+	newRecord.Initialize(newRecordImg_path);
+	newRecord.SetPosition(vec2(.0f, -.45f));
+	newRecord.SetScale(1.0f);
 	replayBt.Initialize(buttonreplay_path);
 	replayBt.SetPosition(vec2(.0f, -0.2f));
 	replayBt.SetScale(vec2(0.32f, 0.08f));
