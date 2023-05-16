@@ -10,6 +10,10 @@
 #include "windows.h"
 #include <algorithm>
 #include <random>
+#include <fstream>
+#include <iostream>
+#include <string>
+//using namespace std;
 
 // app
 int windowWidth = 600, windowHeight = 700;
@@ -36,6 +40,7 @@ string startBt_path = dir+"button-play.png";
 string endBt_path = dir+"button-exit.png";
 string buttonreplay_path = dir+"button-replay1.png";
 string buttonmenu_path = dir+"button-menu.png";
+string gameRecordFileName = "game_record.txt";
 
 // audio file path
 const char* gameOverWav_path = "Audio/mixkit-truck-crash-with-explosion-1616.wav";
@@ -58,11 +63,40 @@ const float baseLoopDuration = 4;
 float loopDuration = 4;
 time_t startTime;
 float elapsedTime = 0; // in seconds
+float curRecord = 0; // hold game best record
 
 // initial obstacleStartXs
 void shuffleStartXs() {
 	int length = sizeof(obstacleStartXs) / sizeof(obstacleStartXs[0]);
 	shuffle(obstacleStartXs, obstacleStartXs + length, default_random_engine(time(nullptr)));
+}
+
+// handle game record
+void checkGameRecord() {
+	// create txt file to save game record
+	fstream myFile;
+	myFile.open(gameRecordFileName, ios::in);
+	string line;
+	if (myFile.is_open()) {
+		getline(myFile, line);
+	}
+	if (line.empty()) {
+		cout << "no current game record is found" << endl;
+		myFile.close();
+		return;
+	}
+	curRecord = stof(line);
+	myFile.close();
+	cout << "the current game record is: " << curRecord << endl;
+}
+
+void writeGameRecord() {
+	fstream myFile;
+	myFile.open(gameRecordFileName, ios::out);
+	if (myFile.is_open()) {
+		myFile << to_string(elapsedTime);
+		myFile.close();
+	}
 }
 
 // Sound
@@ -93,6 +127,8 @@ void StartGame() {
 	loopDuration = baseLoopDuration;
 	gameover = false;
 	intersected = NULL;
+	// extract game record
+	checkGameRecord();
 	// play bg music and car sound effect
 	playCarSoundEffect();
 }
@@ -188,7 +224,7 @@ void DisplayGame() {
 	Text(10, windowHeight-40, green, 13, "%s", "Score:");
 	Text(90, windowHeight-40, green, 13, "%3.1f", elapsedTime);
 	Text(windowWidth-120, windowHeight-40, green, 13, "%s", "Best:");
-	Text(windowWidth-60, windowHeight-40, green, 13, "%3.1f", elapsedTime);
+	Text(windowWidth-60, windowHeight-40, green, 13, "%3.1f", curRecord);
 
 	// display obstacles
 	for (Sprite &s : obstacles)
@@ -211,6 +247,11 @@ void DisplayGame() {
 		explosion.Display();
 		replayBt.Display();
 		returnToMenuBt.Display();
+		// compare the current time to game record
+		if (elapsedTime > curRecord) {
+			writeGameRecord();
+		}
+		// display player socre
 		Text(windowWidth/2-80, windowHeight/2, red, 16, "%s", "Your score");
 		Text(windowWidth/2-30, windowHeight/2-25, red, 16, "%3.1f", elapsedTime);
 		if (hoveringreplayBt) 
