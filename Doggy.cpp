@@ -239,6 +239,10 @@ void DisplayGame() {
 	if (gameover || intersected) {
 		// game over
 		if (!gameover) {
+			// compare the current time to game record
+			if (elapsedTime > curRecord) {
+				writeGameRecord();
+			}
 			PlaySoundA(NULL, NULL, 0);
 			PlaySoundA(gameOverWav_path, NULL, SND_ASYNC | SND_NODEFAULT | SND_NOSTOP);
 		}
@@ -248,9 +252,8 @@ void DisplayGame() {
 		explosion.Display();
 		replayBt.Display();
 		returnToMenuBt.Display();
-		// compare the current time to game record
+		// display congratulation sprite
 		if (elapsedTime > curRecord) {
-			writeGameRecord();
 			congratz.Display();
 		}
 		// display player socre
