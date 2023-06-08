@@ -117,8 +117,7 @@ void playMenuBgMusic() {
 	//PlaySound(menuBgMusic_path, NULL, SND_ASYNC | SND_FILENAME | SND_NOSTOP);
 }
 
-// Game State
-
+// StartGame function serves as transition to start a game session
 void StartGame() {
 	shuffleStartXs();
 	for (int i = 0; i < nObstacles; i++)
@@ -136,7 +135,6 @@ void StartGame() {
 }
 
 // Mouse Handlers
-
 void MouseButton(float x, float y, bool left, bool down) { 
 	if (left && down) {
 		if (startBt.Hit(x, y)) {
@@ -167,8 +165,7 @@ void MouseMove(float x, float y, bool leftDown, bool rightDown) {
 	hoveringreturnToMenuBt = returnToMenuBt.Hit(x, y);
 }
 
-// Animation
-
+// scrolling function - handle forward motion in game play
 void Scroll() {
 	// increase speed with time, until loopDuration is smaller than 1(150s)
 	if (loopDuration > 1)
@@ -194,6 +191,7 @@ void Scroll() {
 		}
 }
 
+// handle game elapased time, scrolling, and player keyboard inputs
 void Animate() {
 	if (!gameover) {
 		elapsedTime = (float)(clock() - startTime)/CLOCKS_PER_SEC;
@@ -206,8 +204,7 @@ void Animate() {
 	}
 }
 
-// Display
-
+// display & render main menu
 void DisplayMenu() {
 	menuBG.Display();
 	startBt.Display();
@@ -218,6 +215,7 @@ void DisplayMenu() {
 		endBt.Outline(yellow, 2);
 }
 
+// display & render game play
 void DisplayGame() {
 	background.Display();
 	player.Display();
@@ -268,6 +266,7 @@ void DisplayGame() {
 	glFlush();
 }
 
+// main display & render function
 void Display() {
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -277,8 +276,7 @@ void Display() {
 		DisplayGame();
 }
 
-// Make Scene
-
+// initialize menu resource
 void InitializeMenuSprites() {
 	menuBG.Initialize(menuBG_path);
 	startBt.Initialize(startBt_path);
@@ -289,11 +287,13 @@ void InitializeMenuSprites() {
 	endBt.SetScale(vec2(0.31f, 0.1f));
 }
 
+// initialize obstacle(s) sprites
 void InitializeObstacle(Sprite &s, const char *name, float startX) {
 	s.Initialize(dir+string(name));
 	s.SetScale(.1f);
 }
 
+// initialize game play sprites
 void InitializeGameSprites() {
 	background.Initialize(backgroundImg_path);
 	player.Initialize(playerImg_path);
@@ -317,7 +317,6 @@ void InitializeGameSprites() {
 }
 
 // Application
-
 void Resize(int width, int height) { glViewport(0, 0, width, height); }
 
 int main(int ac, char** av) {
