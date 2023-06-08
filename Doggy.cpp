@@ -101,8 +101,7 @@ void writeGameRecord() {
 	}
 }
 
-// Sound
-
+// sound functions
 void playBtnSound() {
 	PlaySoundA(NULL, NULL, 0);
 	PlaySoundA(btnClickWav_path, NULL, SND_SYNC | SND_NODEFAULT | SND_NOSTOP);
