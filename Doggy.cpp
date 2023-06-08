@@ -30,6 +30,7 @@ const float obstacleDelays[] = { 2.0f, 3.0f, 5.3f };
 const int nObstacles = sizeof(obstacleDelays) / sizeof(const char*);
 float obstacleStartXs[] = { -0.45f, -0.15, 0.15f, 0.45f };
 
+// images directories
 string dir("Image/");
 // string dir("C:/Users/Jules/Code/GG-Projects/#3-Car-Collision/");
 string backgroundImg_path = dir+"game-bg.png";
