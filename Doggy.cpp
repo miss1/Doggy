@@ -323,17 +323,20 @@ void Resize(int width, int height) { glViewport(0, 0, width, height); }
 int main(int ac, char** av) {
 	GLFWwindow *w = InitGLFW(450, 200, windowWidth, windowHeight, "Doggy");
 	glfwSetWindowSizeLimits(w, 450, 200, windowWidth, windowHeight);
+
 	// read background, foreground, and mat textures
 	InitializeMenuSprites();
 	InitializeGameSprites();
+
 	// callbacks
 	RegisterResize(Resize);
 	RegisterMouseButton(MouseButton);
 	RegisterMouseMove(MouseMove);
 
+	// start playing menu BGM
 	playMenuBgMusic();
 
-	// event loop
+	// main/master event loop
 	while (!glfwWindowShouldClose(w) && !terminateGame) {
 		Animate();
 		Display();
