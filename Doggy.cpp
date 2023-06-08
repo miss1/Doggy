@@ -221,7 +221,7 @@ void DisplayGame() {
 	background.Display();
 	player.Display();
 
-	// display time
+	// display time and current game record
 	Text(10, windowHeight-40, green, 13, "%s", "Score:");
 	Text(90, windowHeight-40, green, 13, "%3.1f", elapsedTime);
 	Text(windowWidth-120, windowHeight-40, green, 13, "%s", "Best:");
