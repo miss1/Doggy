@@ -46,7 +46,6 @@ string gameRecordFileName = "game_record.txt";
 
 // audio file path
 const char* gameOverWav_path = "Audio/mixkit-truck-crash-with-explosion-1616.wav";
-const char* bgmWav_path = "Audio/bgm.wav";
 const char* btnClickWav_path = "Audio/mixkit-car-door-slam-1564.wav";
 const char* menuBgMusic_path = "Audio/Bush - The People That We Love (Instrumental).wav";
 const char* carSoundEffect_path = "Audio/Lexus Lf-a Sound.wav";
